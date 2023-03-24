@@ -7,4 +7,4 @@ def home():
     return f'<h1>hello world</h1>'
 
 if __name__=='__main__':
-    app.run('0.0.0.0',port=8000,debug=True)
+    app.run('0.0.0.0',debug=True)
