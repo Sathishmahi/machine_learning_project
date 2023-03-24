@@ -11,6 +11,7 @@ except Exception as e:
     print(exe)
     logging.error(exe)
 def get_requirements_list()->List[str]:
+    "sathish"
     try:
         with open(REQUIREMENTS_FILE_NAME,'r') as file:
             logging.debug("error occured")
