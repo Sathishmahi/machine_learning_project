@@ -3,4 +3,6 @@ gunicorn
 numpy
 pandas
 scikit-learn
+pyyaml
+six
 -e .
