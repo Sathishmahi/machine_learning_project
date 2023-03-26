@@ -106,6 +106,8 @@ class DataInjection:
             tgz_file_path=self.download_data()
             raw_data_path=self.extract_zip(tgz_file_path)
             data_injection_arti=self.split_train_and_test()
+            logging.info(msg=f'data injected successfully data injeciton artifacts  [{data_injection_arti}]')
+            return data_injection_arti
         except Exception as e:
             raise CustomException(error_msg=e, error_details=sys)
 

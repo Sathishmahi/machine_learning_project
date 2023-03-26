@@ -74,3 +74,11 @@ MODEL_EVALUATION_FILE_NAME_KEY="model_evaluation_file_name"
 
 
 
+###  Validation schema related constant variable
+
+COLUMNS_KEY="columns"
+NUMERICAL_COLUMNS_KEY="numeric_columns"
+CATEGORICAL_COLUMNS_KEY="categorical_columns"
+TARGET_COLUMN_KEY="target_column"
+DOMAIN_VALUE_KEY="domain_value"
+INSIDE_DOMAIN_VALUE_KEY="ocean_proximity"
