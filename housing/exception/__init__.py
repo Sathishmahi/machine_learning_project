@@ -22,9 +22,17 @@ class CustomException(Exception):
             str: error message
         """
         _, _, exc_tb = error_details.exc_info()
-        line_number = exc_tb.tb_frame.f_lineno
+        except_line_number = exc_tb.tb_frame.f_lineno
+        exact_lineno=exc_tb.tb_lineno
         file_name = exc_tb.tb_frame.f_code.co_filename
-        error_message = f"error occured the script [{file_name}] and line number is [{line_number}] error msg is [{error_msg}]"
+        error_message = f"""
+
+        error occured the script [ {file_name} ] and 
+        try-exception line number is [{except_line_number}] 
+        exact line number is [{exact_lineno}] 
+        error msg is [{error_msg}]
+        
+        """
         return error_message
 
     def __str__(self):

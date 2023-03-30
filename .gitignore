@@ -131,3 +131,4 @@ dmypy.json
 logs/
 test.*
 artifact/
+all_plots/

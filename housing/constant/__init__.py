@@ -82,3 +82,37 @@ CATEGORICAL_COLUMNS_KEY="categorical_columns"
 TARGET_COLUMN_KEY="target_column"
 DOMAIN_VALUE_KEY="domain_value"
 INSIDE_DOMAIN_VALUE_KEY="ocean_proximity"
+
+### all plot related information
+HISTOGRAM_PLOT_DIR=os.path.join(
+    'histogram_plots',
+    CURRENT_TIME_STAMP
+)
+HISTOGRAM_PLOT_DIR=os.path.join(
+    'histogram',
+    CURRENT_TIME_STAMP
+)
+BAR_PLOT_DIR=os.path.join(
+    'barplots',
+    CURRENT_TIME_STAMP
+)
+BOX_PLOT_DIR=os.path.join(
+    'boxplots',
+    CURRENT_TIME_STAMP
+)
+CORR_PLOT_DIR=os.path.join(
+    'corr',
+    CURRENT_TIME_STAMP
+)
+DIST_PLOT_DIR=os.path.join(
+    'distplots',
+    CURRENT_TIME_STAMP
+)
+SCATTER_PLOT_DIR=os.path.join(
+    'scatterplots',
+    CURRENT_TIME_STAMP
+)
+COUNTS_PLOT_DIR=os.path.join(
+    'countplots',
+    CURRENT_TIME_STAMP
+)
