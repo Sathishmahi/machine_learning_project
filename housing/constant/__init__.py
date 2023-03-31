@@ -54,6 +54,26 @@ DATA_TRANSFORMATION_TRANSFORMED_TRAIN_DIR_KEY="transformed_train_dir"
 DATA_TRANSFORMATION_TRANSFORMED_TEST_DIR_KEY="transformed_test_dir"
 DATA_TRANSFORMATION_TRANSFORMED_PROCESSING_DIR_KEY="preprocessing_dir"
 DATA_TRANSFORMATION_TRANSFORMED_PROCESSING_OBJECT_FILE_NAME_KEY="preprocessed_object_file_name"
+DATA_TRANSFORMATION_JSON_TRAIN_PATH="json_info_file_path"
+
+
+## report json related var
+
+ALL_NULL_VALUES_COLUMNS_KEY="all_null_value_columns"
+ALL_MULTICOLINEARITY_COLUMNS_DICT_KEY="all_multi_colinearity_features_dict"
+ALL_NEGATIVE_CORR_COLUMNS_KEY="all_negative_corr_col_dic"
+UNNORMAL_DIST_COLUMNS_KEY="un_normal_dist_col"
+ALL_DISCRETE_COLUMNS_KEY="all_cat_columns"
+
+
+
+## train transformation json file related var
+AFTER_HANDLE_NEGATIVE_CORRELATION_TRAIN_DF_COLUMNS_LIST="after_handle_negative_correlation_train_df_columns"
+ALL_UNNORMAL_DISTRIBUTION_COLUMNS_LIST="all_non_normal_distribution_columns_list"
+AFTER_HANDLE_THE_MULTICOLINEARITY_TRAIN_DF_COLUMNS_LIST="after_handle_multi_colineraity_train_df_columns"
+HANDLE_CAT_FEATURES_DICT="handle_cat_features_dict"
+AFTER_REMOVE_ONE_STD_TRAIN_DIR_LIST="after_handle_one_std_train_df_columns"
+
 
 
 ### model training config related constant variable

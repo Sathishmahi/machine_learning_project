@@ -25,6 +25,8 @@ data_transformation_config:
   transformed_test_dir: test
   preprocessing_dir: preprocessed
   preprocessed_object_file_name: preprocessed.pkl
+  json_info_file_path: json_train_info.json
+
   
 model_trainer_config:
   model_training_dir: model_training

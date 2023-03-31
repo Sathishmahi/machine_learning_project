@@ -23,7 +23,7 @@ class CustomException(Exception):
         """
         _, _, exc_tb = error_details.exc_info()
         except_line_number = exc_tb.tb_frame.f_lineno
-        exact_lineno=exc_tb.tb_lineno
+        exact_lineno = exc_tb.tb_lineno
         file_name = exc_tb.tb_frame.f_code.co_filename
         error_message = f"""
 
