@@ -17,5 +17,9 @@ FeatureEngineeringArtifacts = namedtuple(
         "tranformation_model_path",
         "is_done_for_FE",
         "message",
-    ],
+    ]
 )
+
+DataTrainingArtifacts = namedtuple("DataTrainingArtifacts", [
+    "model_training_json_file_path",
+])

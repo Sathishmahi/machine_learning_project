@@ -191,12 +191,12 @@ class HousingConfig:
                 self.time_stamp,
             )
 
-            trained_model_file_path = os.path.join(
+            trained_model_dir = os.path.join(
                 MODEL_TRAINING_ROOT_DIR,
                 model_training_config_dic.get(MODEL_TRAINING_TRAINED_MODEL_DIR_KEY),
-                model_training_config_dic.get(
-                    MODEL_TRAINING_TRAINED_MODEL_FILE_NAME_KEY
-                ),
+                # model_training_config_dic.get(
+                #     MODEL_TRAINING_TRAINED_MODEL_FILE_NAME_KEY
+                # ),
             )
             base_accuracy = model_training_config_dic.get(
                 MODEL_TRAINING_MODEL_BASE_ACCURACY_KEY
@@ -209,7 +209,7 @@ class HousingConfig:
                 ),
             )
             model_training_config = ModelTrainerConfig(
-                trained_model_file_path, base_accuracy, model_config_file_path
+                trained_model_dir, base_accuracy, model_config_file_path
             )
             logging.info(f"model_training_config : {model_training_config}")
             return model_training_config

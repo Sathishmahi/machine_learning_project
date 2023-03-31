@@ -25,17 +25,15 @@ class DataTransformation:
         data_validation_artifacts: DataValidationArtifacts,
         config: HousingConfig = HousingConfig(),
     ):
-      try:
-        self.data_injection_artifacts = data_injection_artifacts
-        self.data_transformation_config = config.model_transformation_config
-      except Exception as e:
-        raise CustomException(e,sys) from e
+        try:
+            self.data_injection_artifacts = data_injection_artifacts
+            self.data_transformation_config = config.model_transformation_config
+        except Exception as e:
+            raise CustomException(e, sys) from e
 
     def read_json(self, key: str) -> dict:
-      # self.data_validation_artifacts.json_report_file_path
-        with open('housing/component/final_report.json'
-            , "r"
-        ) as json_file:
+        # self.data_validation_artifacts.json_report_file_path
+        with open("housing/component/final_report.json", "r") as json_file:
             json_content = json.load(json_file)
         return json_content.get(key)
 
@@ -52,7 +50,9 @@ class DataTransformation:
         try:
             df_new = df.copy()
             all_dicreate_col_list = self.read_json(ALL_DISCRETE_COLUMNS_KEY)
-            all_discrete_columns = [col for col in all_dicreate_col_list if col in df_new.columns]
+            all_discrete_columns = [
+                col for col in all_dicreate_col_list if col in df_new.columns
+            ]
             mapped_dict = dict()
             if is_train_data:
                 for column in all_discrete_columns:
@@ -74,10 +74,8 @@ class DataTransformation:
                     with open(json_file_path, "r") as json_file:
                         already_present_dict = json.load(json_file)
                 with open(json_file_path, "w") as json_file:
-                    already_present_dict.update(
-                        {HANDLE_CAT_FEATURES_DICT: mapped_dict}
-                    )
-                    json.dump(already_present_dict,json_file)
+                    already_present_dict.update({HANDLE_CAT_FEATURES_DICT: mapped_dict})
+                    json.dump(already_present_dict, json_file)
                 file_path = os.path.join(transformed_train_data_dir, file_name)
                 df_new.to_csv(file_path, index=False)
 
@@ -112,7 +110,7 @@ class DataTransformation:
             knn.fit(x_train, y_train)
             if model_save_or_not:
                 with open(model_path, "wb") as pickle_file:
-                    pickle.dump(knn,pickle_file)
+                    pickle.dump(knn, pickle_file)
             return knn.predict(x_test)
         except Exception as e:
             raise CustomException(e, sys) from e
@@ -127,9 +125,9 @@ class DataTransformation:
         is_train_data: bool = True,
     ):
         try:
-            os.makedirs(model_save_dir,exist_ok=True)
-            os.makedirs(train_data_dir,exist_ok=True)
-            os.makedirs(test_data_dir,exist_ok=True)
+            os.makedirs(model_save_dir, exist_ok=True)
+            os.makedirs(train_data_dir, exist_ok=True)
+            os.makedirs(test_data_dir, exist_ok=True)
             df_new = df.copy()
             all_na_columns_list = self.read_json(ALL_NULL_VALUES_COLUMNS_KEY)
             all_na_columns = [column[0] for column in all_na_columns_list]
@@ -138,14 +136,14 @@ class DataTransformation:
                 col for col in df_new.columns if col not in all_na_columns
             ]
             all_non_na_val_df = df_new[non_na_columns]
-            
 
             if is_train_data:
-
                 save_or_not = True
                 for na_column in all_na_columns:
                     model_file_path = os.path.join(model_save_dir, f"{na_column}.pkl")
-                    na_idx = all_na_val_df[na_column][all_na_val_df[na_column].isna()].index
+                    na_idx = all_na_val_df[na_column][
+                        all_na_val_df[na_column].isna()
+                    ].index
                     non_na_idx = all_na_val_df[na_column][
                         all_na_val_df[na_column].isna() == False
                     ].index
@@ -179,7 +177,7 @@ class DataTransformation:
             file_name = "to_handle_na_values_test.csv"
             test_data_file_path = os.path.join(test_data_dir, file_name)
             df_new.to_csv(test_data_file_path, index=False)
-            print(f'succesfully finish handle na values  {test_data_file_path}')
+            print(f"succesfully finish handle na values  {test_data_file_path}")
             return test_data_file_path
 
         except Exception as e:
@@ -217,7 +215,7 @@ class DataTransformation:
                 df_new.to_csv(train_file_path, index=False)
                 already_present_dict = dict()
                 if os.path.exists(json_file_path):
-                    print('to read a file ')
+                    print("to read a file ")
                     with open(json_file_path, "r") as json_file:
                         already_present_dict = json.load(json_file)
                 with open(json_file_path, "w") as json_file:
@@ -228,7 +226,7 @@ class DataTransformation:
                             )
                         }
                     )
-                    json.dump(already_present_dict,json_file)
+                    json.dump(already_present_dict, json_file)
 
                 return train_file_path
 
@@ -244,7 +242,9 @@ class DataTransformation:
             file_name = "to_handle_mulitcolinerity_test.csv"
             test_data_file_path = os.path.join(test_data_dir, file_name)
             df_new.to_csv(test_data_file_path, index=False)
-            print(f'succesfully finish all_multi_colinearity_columns  {test_data_file_path}')
+            print(
+                f"succesfully finish all_multi_colinearity_columns  {test_data_file_path}"
+            )
             return test_data_file_path
 
         except Exception as e:
@@ -276,12 +276,10 @@ class DataTransformation:
                 train_file_path = os.path.join(train_data_dir, file_name)
                 already_present_dict = dict()
                 if os.path.exists(json_file_path):
-                    
                     with open(json_file_path, "r") as json_file:
                         already_present_dict = json.load(json_file)
-                        print('already_present_dict ',already_present_dict)
+                        print("already_present_dict ", already_present_dict)
                 with open(json_file_path, "w") as json_file:
-                    
                     already_present_dict.update(
                         {
                             AFTER_HANDLE_NEGATIVE_CORRELATION_TRAIN_DF_COLUMNS_LIST: list(
@@ -289,7 +287,7 @@ class DataTransformation:
                             )
                         }
                     )
-                    json.dump(already_present_dict,json_file)
+                    json.dump(already_present_dict, json_file)
                 df_new.to_csv(train_file_path, index=False)
                 return train_file_path
 
@@ -297,12 +295,12 @@ class DataTransformation:
                 all_remove_colunms_list = json.load(json_file).get(
                     AFTER_HANDLE_NEGATIVE_CORRELATION_TRAIN_DF_COLUMNS_LIST
                 )
-            df_new=df_new.loc[:,all_remove_colunms_list]
+            df_new = df_new.loc[:, all_remove_colunms_list]
             file_name = "to_handle_negative_correlation_test.csv"
             os.makedirs(test_data_dir, exist_ok=True)
             test_data_file_path = os.path.join(test_data_dir, file_name)
             df_new.to_csv(test_data_file_path, index=False)
-            print(f'successfully remove negative corr col {test_data_file_path}')
+            print(f"successfully remove negative corr col {test_data_file_path}")
             return test_data_file_path
 
         except Exception as e:
@@ -366,41 +364,60 @@ class DataTransformation:
 
         except Exception as e:
             raise CustomException(e, sys) from e
-    
-    def to_remove_unwnated_columns(self,df:pd.DataFrame,train_data_dir:str,
-                                    test_data_dir:str,json_info_file_path:str,file_name='final_data_train.csv',is_train_data=True)->str:
+
+    def to_remove_unwnated_columns(
+        self,
+        df: pd.DataFrame,
+        train_data_dir: str,
+        test_data_dir: str,
+        json_info_file_path: str,
+        file_name="final_data_train.csv",
+        is_train_data=True,
+    ) -> str:
         try:
             if is_train_data:
-                os.makedirs(train_data_dir,exist_ok=True)
-                df_new=df.copy()
-            
-                removed_column_list=[col for col in df_new.columns if ('Unnamed' in col) or (np.std(df_new[col])==1.0)]
-                print('removed col list ',removed_column_list)
-                df_new.drop(columns=removed_column_list,inplace=True)
-                train_file_path=os.path.join(train_data_dir,file_name)
-                df_new.to_csv(train_file_path,index=False)
-                already_present_dict=dict()
+                os.makedirs(train_data_dir, exist_ok=True)
+                df_new = df.copy()
+
+                removed_column_list = [
+                    col
+                    for col in df_new.columns
+                    if ("Unnamed" in col) or (np.std(df_new[col]) == 1.0)
+                ]
+                print("removed col list ", removed_column_list)
+                df_new.drop(columns=removed_column_list, inplace=True)
+                train_file_path = os.path.join(train_data_dir, file_name)
+                df_new.to_csv(train_file_path, index=False)
+                already_present_dict = dict()
                 if os.path.exists(json_info_file_path):
                     with open(json_info_file_path) as json_file:
-                        already_present_dict=json.load(json_file)
-                with open(json_info_file_path,'w') as json_file:
-                    already_present_dict.update({AFTER_REMOVE_ONE_STD_TRAIN_DIR_LIST:list(df_new.columns)})
-                    json.dump(already_present_dict,json_file)
+                        already_present_dict = json.load(json_file)
+                with open(json_info_file_path, "w") as json_file:
+                    already_present_dict.update(
+                        {AFTER_REMOVE_ONE_STD_TRAIN_DIR_LIST: list(df_new.columns)}
+                    )
+                    json.dump(already_present_dict, json_file)
                 return train_file_path
-            with open(json_info_file_path,'r') as json_file:
-                after_remove_one_std_columns_list=json.load(json_file).get(AFTER_REMOVE_ONE_STD_TRAIN_DIR_LIST)
-            after_remove_one_std_columns_list=[col for col in after_remove_one_std_columns_list if col in df_new.columns]
-            df_new=df_new.loc[:,after_remove_one_std_columns_list]
-            file_name="final_data_test.csv"
-            test_file_path=os.path.join(test_data_dir,file_name)
-            df_new.to_csv(test_file_path,index=False)
+            with open(json_info_file_path, "r") as json_file:
+                after_remove_one_std_columns_list = json.load(json_file).get(
+                    AFTER_REMOVE_ONE_STD_TRAIN_DIR_LIST
+                )
+            after_remove_one_std_columns_list = [
+                col
+                for col in after_remove_one_std_columns_list
+                if col in df_new.columns
+            ]
+            df_new = df_new.loc[:, after_remove_one_std_columns_list]
+            file_name = "final_data_test.csv"
+            test_file_path = os.path.join(test_data_dir, file_name)
+            df_new.to_csv(test_file_path, index=False)
             return test_file_path
 
         except Exception as e:
             raise CustomException(error_msg=e, error_details=sys)
+
     def initiate_data_transformation(self):
         try:
-            
             train_data_dir = self.data_transformation_config.transformed_train_dir
             test_data_dir = self.data_transformation_config.transformed_test_dir
             json_info_file_path = self.data_transformation_config.json_info_file_path
@@ -411,68 +428,73 @@ class DataTransformation:
             test_file_path = self.data_injection_artifacts.test_file_path
             df_train = pd.read_csv(train_file_path)
             df_test = pd.read_csv(test_file_path)
-            
+
             combine_list = [[df_train, True], [df_test, False]]
             after_transformed_data_path_list = []
             # df,is_train_data=combine_list[0][0],combine_list[0][1]
-            for df,is_train_data in combine_list:
-                
-              # with open(json_info_file_path ,'w') as f:
-              #   json.dump({},f)
-              multi_file_path = self.to_handle_mulitcolinerity(
-                  df,
-                  saved_model_dir,
-                  train_data_dir,
-                  test_data_dir,
-                  json_info_file_path,
-                  is_train_data=is_train_data
-              )
-              print(f"finish multi colinerity")
-              handle_negative_corr_path = self.to_handle_negative_correlation(
-                  pd.read_csv(multi_file_path),
-                  saved_model_dir,
-                  train_data_dir,
-                  test_data_dir,
-                  json_info_file_path,
-                  is_train_data=is_train_data
-              )
-              print(f"finish to handle negative correlation")
-              handle_cat_columns_path = self.to_handle_cat_features(
-                  pd.read_csv(handle_negative_corr_path),
-                  train_data_dir,
-                  test_data_dir,
-                  json_info_file_path,
-                  is_train_data=is_train_data
-              )
-              print(f"finish handle cat features")
-              handle_na_values_path = self.to_handle_na_values(
-                  pd.read_csv(handle_cat_columns_path),
-                  saved_model_dir,
-                  train_data_dir,
-                  test_data_dir,
-                  is_train_data=is_train_data
-              )
-              print("finish handle na values")
-              after_handle_non_normal_dist_data_path=self.to_handle_non_normal_distribution(
-                  pd.read_csv(handle_na_values_path),
-                  saved_model_dir,
-                  train_data_dir,
-                  test_data_dir,
-                  json_info_file_path,
-                  is_train_data=is_train_data
-              )
+            for df, is_train_data in combine_list:
+                # with open(json_info_file_path ,'w') as f:
+                #   json.dump({},f)
+                multi_file_path = self.to_handle_mulitcolinerity(
+                    df,
+                    saved_model_dir,
+                    train_data_dir,
+                    test_data_dir,
+                    json_info_file_path,
+                    is_train_data=is_train_data,
+                )
+                print(f"finish multi colinerity")
+                handle_negative_corr_path = self.to_handle_negative_correlation(
+                    pd.read_csv(multi_file_path),
+                    saved_model_dir,
+                    train_data_dir,
+                    test_data_dir,
+                    json_info_file_path,
+                    is_train_data=is_train_data,
+                )
+                print(f"finish to handle negative correlation")
+                handle_cat_columns_path = self.to_handle_cat_features(
+                    pd.read_csv(handle_negative_corr_path),
+                    train_data_dir,
+                    test_data_dir,
+                    json_info_file_path,
+                    is_train_data=is_train_data,
+                )
+                print(f"finish handle cat features")
+                handle_na_values_path = self.to_handle_na_values(
+                    pd.read_csv(handle_cat_columns_path),
+                    saved_model_dir,
+                    train_data_dir,
+                    test_data_dir,
+                    is_train_data=is_train_data,
+                )
+                print("finish handle na values")
+                after_handle_non_normal_dist_data_path = (
+                    self.to_handle_non_normal_distribution(
+                        pd.read_csv(handle_na_values_path),
+                        saved_model_dir,
+                        train_data_dir,
+                        test_data_dir,
+                        json_info_file_path,
+                        is_train_data=is_train_data,
+                    )
+                )
 
-              print(f"finish to handle non normal dist")
-              final_data_path=self.to_remove_unwnated_columns(df=pd.read_csv(after_handle_non_normal_dist_data_path), train_data_dir=train_data_dir, test_data_dir=test_data_dir, 
-                                                json_info_file_path=json_info_file_path,is_train_data=is_train_data)
-              print('finish data transformation')
-              after_transformed_data_path_list.append(
-                  final_data_path
-              )
+                print(f"finish to handle non normal dist")
+                final_data_path = self.to_remove_unwnated_columns(
+                    df=pd.read_csv(after_handle_non_normal_dist_data_path),
+                    train_data_dir=train_data_dir,
+                    test_data_dir=test_data_dir,
+                    json_info_file_path=json_info_file_path,
+                    is_train_data=is_train_data,
+                )
+                print("finish data transformation")
+                after_transformed_data_path_list.append(final_data_path)
 
             after_transformed_train_data_path, after_transformed_test_data_path = (
-            after_transformed_data_path_list[0],
-            after_transformed_data_path_list[1])
+                after_transformed_data_path_list[0],
+                after_transformed_data_path_list[1],
+            )
 
             feature_engineering_artifacts = FeatureEngineeringArtifacts(
                 transformed_train_file_path=after_transformed_train_data_path,

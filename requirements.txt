@@ -7,4 +7,6 @@ pyyaml
 six
 matplotlib
 seaborn
+lightgbm
+xgboost
 -e .

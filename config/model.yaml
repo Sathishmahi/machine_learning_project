@@ -1,0 +1,10 @@
+model_training:
+  model_name_list:
+  - lgbmregressor
+  - adaboostregressor
+  - gradientboostingregressor
+  - randomforestgressor
+  - decisontreegressor
+  - lasso
+  - ridge
+  - elasticnet
