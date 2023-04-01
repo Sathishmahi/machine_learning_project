@@ -30,6 +30,7 @@ class ModelTraining:
             model_config_file_path=self.model_training_config.model_config_file_path
             model_info_json_file_path=self.model_training_config.model_info_jaon_file_path
             cluster_model_file_path=self.model_training_config.cluster_model_file_path
+            overall_model_info_json_file_path=self.model_training_config.overall_models_info_json_path
             schema_file_path='/config/workspace/config/schema.yaml'
             with open(model_config_file_path,'r') as yaml_file:
                 all_models_name_list=yaml.safe_load(yaml_file).get(MODEL_TRAINING_DICT_KEY).get(MODEL_TRAINING_MODEL_NAMES_LIST)
@@ -37,6 +38,7 @@ class ModelTraining:
             
             for path in [trained_model_dir,os.path.dirname(cluster_model_file_path)]:
                 os.makedirs(path,exist_ok=True)
+            
             train_file_path=self.feature_engineering_artifacts.transformed_train_file_path
             test_file_path=self.feature_engineering_artifacts.transformed_test_file_path
             target_cloumn_name=util.read_yaml(file_path=schema_file_path).get(TARGET_COLUMN_KEY)
@@ -44,7 +46,7 @@ class ModelTraining:
 
             model_training_artifacts=combine.to_return_best_model(df=pd.read_csv(train_file_path).iloc[:1000,:], target_col_name=target_cloumn_name, 
             to_stote_model_path=trained_model_dir, test_data=pd.read_csv(test_file_path).iloc[:250,:], 
-            json_training_info_file_path=model_info_json_file_path, cluster_file_path=cluster_model_file_path)
+            json_training_info_file_path=model_info_json_file_path, n_clusters=2,cluster_file_path=cluster_model_file_path,overall_model_info_json_file_path=overall_model_info_json_file_path)
             return model_training_artifacts
         except Exception as e:
             raise CustomException(error_msg=e, error_details=sys)

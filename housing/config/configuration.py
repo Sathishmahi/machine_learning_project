@@ -13,7 +13,7 @@ from housing.entity.config_entity import (
 )
 from housing.utils.util import read_yaml
 from housing.constant import *
-
+import shutil
 
 class HousingConfig:
     def __init__(
@@ -219,11 +219,18 @@ class HousingConfig:
                 MODEL_TRAINING_ROOT_DIR,
                 model_training_config_dic.get(MODEL_TRAINING_MODEL_INFO_JSON_FILE_NAME_KEY)
             )
+
+            model_training_overall_model_info_json_file_path=os.path.join(
+                self.model_pipeline_config.artifact_dir,
+                model_training_config_dic.get(MODEL_TRAINING_DIR_KEY),
+                model_training_config_dic.get(MODEL_TRAINING_OVERALL_MODEL_INFO_JSON_FILE_NAME_KEY)
+            )
             model_training_config = ModelTrainerConfig(
                 trained_model_dir, base_accuracy, model_config_file_path,
                 model_info_json_file_path,
-                cluster_model_file_path
+                cluster_model_file_path,model_training_overall_model_info_json_file_path
             )
+
             logging.info(f"model_training_config : {model_training_config}")
             return model_training_config
         except Exception as e:
@@ -231,20 +238,20 @@ class HousingConfig:
 
     def get_data_model_evaluation_config(self) -> ModelEvaluationConfig:
         try:
-            model_evaluaton_config_dic = self.config_info.get(
-                MODEL_EVALUATION_CONFIG_KEY
-            )
+            
+            model_evaluation_config_dic=self.config_info.get(MODEL_EVALUATION_CONFIG_KEY)
             MODEL_EVALUATION_ROOT_DIR = os.path.join(
                 self.model_pipeline_config.artifact_dir,
-                model_evaluaton_config_dic.get(MODEL_EVALUATION_DIR_KEY),
-                self.time_stamp,
+                model_evaluation_config_dic.get(MODEL_EVALUATION_DIR_KEY),
             )
-            model_evaluation_file_path = os.path.join(
-                MODEL_EVALUATION_ROOT_DIR,
-                model_evaluaton_config_dic.get(MODEL_EVALUATION_FILE_NAME_KEY),
+
+            current_model_report_json_path=os.path.join(
+            MODEL_EVALUATION_ROOT_DIR,
+            model_evaluation_config_dic.get(MODEL_EVALUATION_CURRENT_MODEL_INFO_JSON_FILE_NAME)
             )
+        
             model_evaluation_config = ModelEvaluationConfig(
-                model_evaluation_file_path, self.time_stamp
+            current_model_report_json_path    
             )
             logging.info(f"model_evaluation_config : {model_evaluation_config}")
             return model_evaluation_config
@@ -255,19 +262,25 @@ class HousingConfig:
     def get_data_model_push_config(self) -> ModelPusherConfig:
         try:
             model_pushing_config_dic = self.config_info.get(MODEL_PUSHER_CONFIG_KEY)
-            model_export_dir_name = model_pushing_config_dic.get(
-                MODEL_PUSHER_MODEL_EXPORT_DIR_KEY
-            )
-            MODEL_PUSHER_ROOT_DIR = os.path.join(
+            ROOT_DIR=os.path.join(
                 self.model_pipeline_config.artifact_dir,
-                model_pushing_config_dic.get(MODEL_PUSHER_DIR_KEY),
-                self.time_stamp,
+                MODEL_PUSHER_CONFIG_KEY)
+            old_production_model_dir_path=os.path.join(
+                ROOT_DIR,
+                model_pushing_config_dic.get(MODEL_PUSHER_OLD_PRODUCTION_MODEL_DIR_NAME_KEY)
             )
-            model_export_dir = os.path.join(
-                MODEL_PUSHER_ROOT_DIR, MODEL_PUSHER_MODEL_EXPORT_DIR_KEY
-            )
-            model_pusher_config = ModelPusherConfig(export_dir_path=model_export_dir)
 
+            production_models_dir_path=os.path.join(
+                ROOT_DIR,
+                model_pushing_config_dic.get(MODEL_PUSHER_PRODUCTION_MODELS_DIR_NAME_KEY)
+            )
+
+            cluster_model_dir_path=os.path.join(
+                ROOT_DIR,
+                model_pushing_config_dic.get(MODEL_PUSHER_CLUSTER_MODEL_DIR_NAME_KEY)
+            )
+            model_pusher_config = ModelPusherConfig(production_models_dir=production_models_dir_path, old_production_model_dir=old_production_model_dir_path, 
+            cluster_model_dir=cluster_model_dir_path)
             logging.info(msg=f"model_pusher_config : {model_pusher_config}")
             return model_pusher_config
         except Exception as e:

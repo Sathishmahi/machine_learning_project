@@ -38,13 +38,14 @@ model_trainer_config:
   model_info_json_file_name : model_info_json.json
   cluster_dir : trained_cluster
   cluster_file_name : cluster.pkl
-
+  overall_model_info_json_file_name : overall_model_info_json.json
 
 model_evaluation_config:
   model_evaluation_dir: model_evaluaiton
-  model_evaluation_file_name: model_evaluation.yaml
+  model_evaluation_current_model_json_file_info_name: model_evaluation_current_model_info_json.json
   
 
 model_pusher_config:
-  model_pusher_dir: model_pusher
-  model_export_dir: saved_models
+  production_models_dir: production_models
+  old_production_model_dir: old_production_models
+  cluster_model_dir: cluster_model

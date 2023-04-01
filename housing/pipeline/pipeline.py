@@ -6,13 +6,16 @@ from housing.component.data_validation import DataValidation
 from housing.component.feature_engineering import DataTransformation
 from housing.component.model_training import ModelTraining
 from housing.logger import logging
-
+from housing.component.model_evaluation import ModelEvaluation
+from housing.component.model_pushing import ModelPushing
 from housing.exception import CustomException
 from housing.entity.artifacts_entity import (
     DataInjectionArtifacts,
     FeatureEngineeringArtifacts,
     DataValidationArtifacts,
-    ModelTrainingArtifacts
+    ModelTrainingArtifacts,
+    ModelEvaluationArtifacts,
+    ModelPushinArtifacts
 )
 from housing.entity.config_entity import DataIngestionConfig
 
@@ -82,21 +85,32 @@ class Pipeline:
             logging.info(f'start model training')
             training=ModelTraining(feature_engineering_artifacts)
             model_training_artifacts=training.initiate_model_training()
-            return model_training_artifacts
             logging.info(f'finish model training and model training output is [{model_training_artifacts}]')
+            return model_training_artifacts
         except Exception as e:
             raise CustomException(error_msg=e, error_details=sys) from  e
 
-    # def start_model_evaluation(self)->ModelEvaluationArtifacts:
-    #     try:
-    #         pass
-    #     except Exception as e:
-    #         raise CustomException(error_msg=e, error_details=sys) from  e
-    # def start_model_pusher(self)->ModelPusherArtifacts:
-    #     try:
-    #         pass
-    #     except Exception as e:
-    #         raise CustomException(error_msg=e, error_details=sys) from  e
+    def start_model_evaluation(self,model_training_artifacts:ModelTrainingArtifacts)->ModelEvaluationArtifacts:
+        try:
+            logging.info(f'start model_evaluation')
+            evaluation=ModelEvaluation(model_training_artifacts)
+            model_dir=model_training_artifacts.saved_model_dir_path
+            json_info_file_path=model_training_artifacts.ovel_all_model_training_json_file_path
+            model_evalation_artifacts=evaluation.initiate_model_evaluation(model_dir, json_info_file_path)
+            logging.info(f'finish model evalation and model training output is [{model_evalation_artifacts}]')
+            return model_evalation_artifacts
+        except Exception as e:
+            raise CustomException(error_msg=e, error_details=sys) from  e
+    def start_model_pusher(self,model_evalation_artifacts:ModelEvaluationArtifacts,cluster_file_path:str,len_of_model_training_dir:int,
+                        train_models_path:str)->ModelPushinArtifacts:
+        try:
+            model_pushing=ModelPushing(model_evaluation_artifacts=model_evalation_artifacts)
+            model_pushing.initiate_model_pushing(cluster_file_path=cluster_file_path,len_of_model_training_dir=len_of_model_training_dir,
+                                                train_models_path=train_models_path)
+        except Exception as e:
+            raise CustomException(error_msg=e, error_details=sys) from  e
+
+
     def run_pipeline(self):
         try:
             data_injection_artifacts = self.start_data_injection()
@@ -121,6 +135,18 @@ class Pipeline:
             print(f"{'='*10}    finish feature engineering       {'='*10}")
             model_training_artifacts=self.start_model_training(feature_engineering_artifacts=feature_engineering_artifacts)
             print(f"{'='*10}    finish model training       {'='*10}")
+
+            model_evalation_artifacts=self.start_model_evaluation(model_training_artifacts=model_training_artifacts)
+            print(f"{'='*10}    finish model evaluation       {'='*10}")
+            model_dir=model_training_artifacts.saved_model_dir_path
+            base_model_dir_list=model_dir.split('/')[:-2]
+            base_model_dir='/'.join(base_model_dir_list)
+            model_dir_items=[item for item in os.listdir(base_model_dir) if '.' not in item]
+            len_of_model_training_dir,cluster_file_path=len(model_dir_items),self.config.model_training_config.cluster_model_file_path
+
+            model_pushing_artifacts=self.start_model_pusher(model_evalation_artifacts=model_evalation_artifacts,cluster_file_path=cluster_file_path, 
+                                                            len_of_model_training_dir=len_of_model_training_dir,train_models_path=model_dir)
+
         except Exception as e:
             logging.error(e)
             raise CustomException(e, sys) from e

@@ -29,9 +29,9 @@ DATA_INJECTION_TEST_DATA_DIR_KEY = "ingested_test_dir"
 
 ###model pushing related constant variable
 MODEL_PUSHER_CONFIG_KEY = "model_pusher_config"
-MODEL_PUSHER_DIR_KEY = "model_pusher_dir"
-MODEL_PUSHER_MODEL_EXPORT_DIR_KEY = "model_export_dir"
-
+MODEL_PUSHER_PRODUCTION_MODELS_DIR_NAME_KEY="production_models_dir"
+MODEL_PUSHER_CLUSTER_MODEL_DIR_NAME_KEY="cluster_model_dir"
+MODEL_PUSHER_OLD_PRODUCTION_MODEL_DIR_NAME_KEY="old_production_model_dir"
 
 ###data validation costant variable
 
@@ -94,12 +94,13 @@ MODEL_TRAINING_MODEL_CONFIG_FILE_NAME_KEY = "model_config_file_name"
 MODEL_TRAINING_MODEL_INFO_JSON_FILE_NAME_KEY="model_info_json_file_name"
 MODEL_TRAINING_CLUSTER_DIR_KEY="cluster_dir"
 MODEL_TRAINING_CLUSTER_FILE_NAME_KEY="cluster_file_name"
+MODEL_TRAINING_OVERALL_MODEL_INFO_JSON_FILE_NAME_KEY= "overall_model_info_json_file_name"
 
 
 ###model evaluation related constant variable
 MODEL_EVALUATION_CONFIG_KEY = "model_evaluation_config"
-MODEL_EVALUATION_DIR_KEY = "model_evaluation_dir"
-MODEL_EVALUATION_FILE_NAME_KEY = "model_evaluation_file_name"
+MODEL_EVALUATION_DIR_KEY="model_evaluation_dir"
+MODEL_EVALUATION_CURRENT_MODEL_INFO_JSON_FILE_NAME="model_evaluation_current_model_json_file_info_name"
 
 
 ###  Validation schema related constant variable

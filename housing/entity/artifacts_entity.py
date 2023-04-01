@@ -21,11 +21,15 @@ FeatureEngineeringArtifacts = namedtuple(
 )
 
 ModelTrainingArtifacts = namedtuple("DataTrainingArtifacts", [
-    "model_training_json_file_path",
+    "ovel_all_model_training_json_file_path",
+    "saved_model_dir_path"
 ])
 
 ModelEvaluationArtifacts=namedtuple("ModelEvaluationArtifacts", [
     "to_change_or_not",
-    "to_changed_model_cluster_grp",
-    "new_model_path"
+    "models_tuple"
+])
+
+ModelPushinArtifacts=namedtuple("ModelPushinArtifacts", [
+    'all_models_dir_path',"cluster_model_dir_path"
 ])

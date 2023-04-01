@@ -107,7 +107,8 @@ class CombineAll(ToClassifyDataUsingCluster,ReturnParams):
             pickle.dump(model,pickle_file)
 
     def to_return_best_model(self,df:pd.DataFrame,target_col_name:str,to_stote_model_path:str,test_data:pd.DataFrame,
-                          json_training_info_file_path:str,cluster_file_path:str,n_clusters=1,base_accuracy=0.6)->ModelTrainingArtifacts:
+                          json_training_info_file_path:str,cluster_file_path:str,overall_model_info_json_file_path:str,
+                          n_clusters=1,base_accuracy=0.6)->ModelTrainingArtifacts:
         
         try:
             cluster_data=self.to_classify_data(df,cluster_file_path,n_clusters=n_clusters).groupby('cluster_no')
@@ -152,8 +153,11 @@ class CombineAll(ToClassifyDataUsingCluster,ReturnParams):
                 model_path=os.path.join(to_stote_model_path,key)
                 self.write_json(json_training_info_file_path=json_training_info_file_path,
                                 content_key=model_path, content_value=list(val))
+
+                self.write_json(json_training_info_file_path=overall_model_info_json_file_path,
+                                content_key=model_path, content_value=list(val))
                                 
                 self.save_best_model(model=model,model_path=model_path)
-            return ModelTrainingArtifacts(model_training_json_file_path=json_training_info_file_path)
+            return ModelTrainingArtifacts(ovel_all_model_training_json_file_path=overall_model_info_json_file_path,saved_model_dir_path=to_stote_model_path)
         except Exception as e:
             raise CustomException(error_msg=e, error_details=sys)
