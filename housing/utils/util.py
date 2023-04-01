@@ -22,3 +22,5 @@ def read_yaml(file_path: str) -> dict:
         # excep=CustomException(error_msg=e, error_details=sys)
         # logging.error(msg=excep)
         raise CustomException(error_msg=e, error_details=sys) from e
+
+

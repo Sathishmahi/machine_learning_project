@@ -27,13 +27,16 @@ DataTransformationConfig = namedtuple(
         "transformed_test_dir",
         "preprocessed_object_file_path",
         "json_info_file_path",
+        
     ],
 )
 
 
 ModelTrainerConfig = namedtuple(
     "ModelTrainerConfig",
-    ["trained_model_file_path", "base_accuracy", "model_config_file_path"],
+    ["trained_model_dir", "base_accuracy", 
+        "model_config_file_path","model_info_jaon_file_path",
+        "cluster_model_file_path"],
 )
 
 ModelEvaluationConfig = namedtuple(

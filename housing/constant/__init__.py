@@ -91,6 +91,9 @@ MODEL_TRAINING_TRAINED_MODEL_FILE_NAME_KEY = "model_file_name"
 MODEL_TRAINING_MODEL_BASE_ACCURACY_KEY = 0.6
 MODEL_TRAINING_MODEL_CONFIG_DIR_KEY = "model_config_dir"
 MODEL_TRAINING_MODEL_CONFIG_FILE_NAME_KEY = "model_config_file_name"
+MODEL_TRAINING_MODEL_INFO_JSON_FILE_NAME_KEY="model_info_json_file_name"
+MODEL_TRAINING_CLUSTER_DIR_KEY="cluster_dir"
+MODEL_TRAINING_CLUSTER_FILE_NAME_KEY="cluster_file_name"
 
 
 ###model evaluation related constant variable

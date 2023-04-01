@@ -20,6 +20,12 @@ FeatureEngineeringArtifacts = namedtuple(
     ]
 )
 
-DataTrainingArtifacts = namedtuple("DataTrainingArtifacts", [
+ModelTrainingArtifacts = namedtuple("DataTrainingArtifacts", [
     "model_training_json_file_path",
+])
+
+ModelEvaluationArtifacts=namedtuple("ModelEvaluationArtifacts", [
+    "to_change_or_not",
+    "to_changed_model_cluster_grp",
+    "new_model_path"
 ])

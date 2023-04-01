@@ -174,7 +174,7 @@ class HousingConfig:
                 transformed_train_dir,
                 transformed_test_dir,
                 preprocessed_object_file_path,
-                json_info_file_path,
+                json_info_file_path
             )
 
             logging.info(f"data_transformation_config : data_transformation_config")
@@ -208,8 +208,21 @@ class HousingConfig:
                     MODEL_TRAINING_MODEL_CONFIG_FILE_NAME_KEY
                 ),
             )
+
+            cluster_model_file_path=os.path.join(
+                MODEL_TRAINING_ROOT_DIR,
+                model_training_config_dic.get(MODEL_TRAINING_CLUSTER_DIR_KEY),
+                model_training_config_dic.get(MODEL_TRAINING_CLUSTER_FILE_NAME_KEY),
+            )
+
+            model_info_json_file_path=os.path.join(
+                MODEL_TRAINING_ROOT_DIR,
+                model_training_config_dic.get(MODEL_TRAINING_MODEL_INFO_JSON_FILE_NAME_KEY)
+            )
             model_training_config = ModelTrainerConfig(
-                trained_model_dir, base_accuracy, model_config_file_path
+                trained_model_dir, base_accuracy, model_config_file_path,
+                model_info_json_file_path,
+                cluster_model_file_path
             )
             logging.info(f"model_training_config : {model_training_config}")
             return model_training_config

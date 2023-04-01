@@ -35,6 +35,9 @@ model_trainer_config:
   base_accuracy: 0.6
   model_config_dir: config
   model_config_file_name: model.yaml
+  model_info_json_file_name : model_info_json.json
+  cluster_dir : trained_cluster
+  cluster_file_name : cluster.pkl
 
 
 model_evaluation_config:

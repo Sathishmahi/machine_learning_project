@@ -1,5 +1,6 @@
 from housing.config.configuration import HousingConfig
 from housing.logger import logging
+from housing.utils import util
 from housing.exception import CustomException
 from housing.utils.util import read_yaml
 from housing.entity.artifacts_entity import (
@@ -28,6 +29,9 @@ class DataTransformation:
         try:
             self.data_injection_artifacts = data_injection_artifacts
             self.data_transformation_config = config.model_transformation_config
+            schema_file_path=config.data_validation_config.schema_file_path
+            target_column=util.read_yaml(file_path=schema_file_path).get(TARGET_COLUMN_KEY)
+            # self.y_data=df.drop(columns=y_data)
         except Exception as e:
             raise CustomException(e, sys) from e
 
@@ -46,6 +50,7 @@ class DataTransformation:
         file_name="to_handle_cat_features_train.csv",
         thersold: int = 15,
         is_train_data=True,
+        
     ):
         try:
             df_new = df.copy()
@@ -375,10 +380,9 @@ class DataTransformation:
         is_train_data=True,
     ) -> str:
         try:
+            df_new=df.copy()
             if is_train_data:
                 os.makedirs(train_data_dir, exist_ok=True)
-                df_new = df.copy()
-
                 removed_column_list = [
                     col
                     for col in df_new.columns
