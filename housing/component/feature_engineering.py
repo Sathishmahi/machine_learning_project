@@ -25,12 +25,15 @@ class DataTransformation:
         data_injection_artifacts: DataInjectionArtifacts,
         data_validation_artifacts: DataValidationArtifacts,
         config: HousingConfig = HousingConfig(),
+        is_prediction_data=False,
+        
     ):
         try:
-            self.data_injection_artifacts = data_injection_artifacts
-            self.data_transformation_config = config.model_transformation_config
-            schema_file_path=config.data_validation_config.schema_file_path
-            target_column=util.read_yaml(file_path=schema_file_path).get(TARGET_COLUMN_KEY)
+            if not is_prediction_data:
+                self.data_injection_artifacts = data_injection_artifacts
+                self.data_transformation_config = config.model_transformation_config
+                schema_file_path=config.data_validation_config.schema_file_path
+                target_column=util.read_yaml(file_path=schema_file_path).get(TARGET_COLUMN_KEY)
             # self.y_data=df.drop(columns=y_data)
         except Exception as e:
             raise CustomException(e, sys) from e
@@ -133,6 +136,7 @@ class DataTransformation:
             os.makedirs(model_save_dir, exist_ok=True)
             os.makedirs(train_data_dir, exist_ok=True)
             os.makedirs(test_data_dir, exist_ok=True)
+            print(f'model svaed dir name ====   {model_save_dir}')
             df_new = df.copy()
             all_na_columns_list = self.read_json(ALL_NULL_VALUES_COLUMNS_KEY)
             all_na_columns = [column[0] for column in all_na_columns_list]
@@ -146,6 +150,7 @@ class DataTransformation:
                 save_or_not = True
                 for na_column in all_na_columns:
                     model_file_path = os.path.join(model_save_dir, f"{na_column}.pkl")
+                    print(f'model file path of knn ======     ',{model_file_path})
                     na_idx = all_na_val_df[na_column][
                         all_na_val_df[na_column].isna()
                     ].index
@@ -173,6 +178,7 @@ class DataTransformation:
                     all_na_val_df[na_column].isna() == False
                 ].index
                 trainded_model_path = os.listdir(model_save_dir)[0]
+                print('file path    ',os.path.join(model_save_dir, trainded_model_path))
                 with open(
                     os.path.join(model_save_dir, trainded_model_path), "rb"
                 ) as pickle_file:
@@ -182,7 +188,7 @@ class DataTransformation:
             file_name = "to_handle_na_values_test.csv"
             test_data_file_path = os.path.join(test_data_dir, file_name)
             df_new.to_csv(test_data_file_path, index=False)
-            print(f"succesfully finish handle na values  {test_data_file_path}")
+            
             return test_data_file_path
 
         except Exception as e:
@@ -220,7 +226,7 @@ class DataTransformation:
                 df_new.to_csv(train_file_path, index=False)
                 already_present_dict = dict()
                 if os.path.exists(json_file_path):
-                    print("to read a file ")
+            
                     with open(json_file_path, "r") as json_file:
                         already_present_dict = json.load(json_file)
                 with open(json_file_path, "w") as json_file:
@@ -247,9 +253,7 @@ class DataTransformation:
             file_name = "to_handle_mulitcolinerity_test.csv"
             test_data_file_path = os.path.join(test_data_dir, file_name)
             df_new.to_csv(test_data_file_path, index=False)
-            print(
-                f"succesfully finish all_multi_colinearity_columns  {test_data_file_path}"
-            )
+            
             return test_data_file_path
 
         except Exception as e:
@@ -283,7 +287,7 @@ class DataTransformation:
                 if os.path.exists(json_file_path):
                     with open(json_file_path, "r") as json_file:
                         already_present_dict = json.load(json_file)
-                        print("already_present_dict ", already_present_dict)
+
                 with open(json_file_path, "w") as json_file:
                     already_present_dict.update(
                         {
@@ -305,7 +309,6 @@ class DataTransformation:
             os.makedirs(test_data_dir, exist_ok=True)
             test_data_file_path = os.path.join(test_data_dir, file_name)
             df_new.to_csv(test_data_file_path, index=False)
-            print(f"successfully remove negative corr col {test_data_file_path}")
             return test_data_file_path
 
         except Exception as e:
@@ -388,7 +391,7 @@ class DataTransformation:
                     for col in df_new.columns
                     if ("Unnamed" in col) or (np.std(df_new[col]) == 1.0)
                 ]
-                print("removed col list ", removed_column_list)
+              
                 df_new.drop(columns=removed_column_list, inplace=True)
                 train_file_path = os.path.join(train_data_dir, file_name)
                 df_new.to_csv(train_file_path, index=False)
@@ -420,22 +423,34 @@ class DataTransformation:
         except Exception as e:
             raise CustomException(error_msg=e, error_details=sys)
 
-    def initiate_data_transformation(self):
+    def initiate_data_transformation(self,saved_model_dir:str=None,latest_training_data_transformation_info_json_path:str=None,
+                                    is_prediction_data=False,save_prediction_data_dir='prediction_data',prediction_df=None,):
         try:
-            train_data_dir = self.data_transformation_config.transformed_train_dir
-            test_data_dir = self.data_transformation_config.transformed_test_dir
-            json_info_file_path = self.data_transformation_config.json_info_file_path
-            saved_model_dir = (
-                self.data_transformation_config.preprocessed_object_file_path
-            )
-            train_file_path = self.data_injection_artifacts.train_file_path
-            test_file_path = self.data_injection_artifacts.test_file_path
-            df_train = pd.read_csv(train_file_path)
-            df_test = pd.read_csv(test_file_path)
+            if not is_prediction_data:
+                train_data_dir = self.data_transformation_config.transformed_train_dir
+                test_data_dir = self.data_transformation_config.transformed_test_dir
+                json_info_file_path = self.data_transformation_config.json_info_file_path
+                saved_model_dir = (
+                    self.data_transformation_config.preprocessed_object_file_path
+                )
+                train_file_path = self.data_injection_artifacts.train_file_path
+                test_file_path = self.data_injection_artifacts.test_file_path
+                df_train = pd.read_csv(train_file_path)
+                df_test = pd.read_csv(test_file_path)
 
-            combine_list = [[df_train, True], [df_test, False]]
-            after_transformed_data_path_list = []
-            # df,is_train_data=combine_list[0][0],combine_list[0][1]
+                combine_list = [[df_train, True], [df_test, False]]
+                after_transformed_data_path_list = []
+                # df,is_train_data=combine_list[0][0],combine_list[0][1]
+            else:
+                train_data_dir = None
+                test_data_dir = save_prediction_data_dir
+                json_info_file_path = latest_training_data_transformation_info_json_path
+                saved_model_dir = saved_model_dir
+                train_file_path = None
+                
+                df_train =None
+                df_test = prediction_df
+                combine_list = [[df_test,False]]
             for df, is_train_data in combine_list:
                 # with open(json_info_file_path ,'w') as f:
                 #   json.dump({},f)
@@ -494,21 +509,34 @@ class DataTransformation:
                 )
                 print("finish data transformation")
                 after_transformed_data_path_list.append(final_data_path)
+            if not is_prediction_data:
+                after_transformed_train_data_path, after_transformed_test_data_path = (
+                    after_transformed_data_path_list[0],
+                    after_transformed_data_path_list[1],
+                )
 
-            after_transformed_train_data_path, after_transformed_test_data_path = (
-                after_transformed_data_path_list[0],
-                after_transformed_data_path_list[1],
-            )
+                feature_engineering_artifacts = FeatureEngineeringArtifacts(
+                    transformed_train_file_path=after_transformed_train_data_path,
+                    transformed_test_file_path=after_transformed_test_data_path,
+                    tranformation_model_path=saved_model_dir,
+                    is_done_for_FE=True,
+                    message=f"to finish feature enginnering",
+                    trained_model_info_json_path=json_info_file_path
+                )
+                
 
-            feature_engineering_artifacts = FeatureEngineeringArtifacts(
-                transformed_train_file_path=after_transformed_train_data_path,
-                transformed_test_file_path=after_transformed_test_data_path,
-                tranformation_model_path=saved_model_dir,
-                is_done_for_FE=True,
-                message=f"to finish feature enginnering",
-            )
-            print(feature_engineering_artifacts)
+                return feature_engineering_artifacts
+            else:
+                print(after_transformed_data_path_list)
+                return after_transformed_data_path_list
+            #     train_data_dir = None
+            #     test_data_dir = save_prediction_data_dir
+            #     json_info_file_path = self.data_transformation_config.json_info_file_path
+            #     saved_model_dir = None
+            #     train_file_path = None
+                
+            #     df_train =None
+            #     df_test = prediction_df
 
-            return feature_engineering_artifacts
         except Exception as e:
             raise CustomException(e, sys) from e

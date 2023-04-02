@@ -31,7 +31,7 @@ class ReturnParams:
             raise CustomException(error_msg=e, error_details=sys)
     def _return_params(self,model_name:str,json_file_path:str=None)->dict:
         try:
-            print(f'model name == {model_name}')
+            
             return self.all_params_dict.get(model_name)
         except Exception as e:
             raise CustomException(error_msg=e, error_details=sys)
@@ -114,7 +114,7 @@ class CombineAll(ToClassifyDataUsingCluster,ReturnParams):
             cluster_data=self.to_classify_data(df,cluster_file_path,n_clusters=n_clusters).groupby('cluster_no')
             test_df=self.predict_data(test_data,cluster_file_path)
             cluster_grp_test=test_df.groupby('cluster_no')
-            print(f'cluster group by done')
+            
             
             model_dict_based_grp={}
             for grp,data in cluster_data:
@@ -148,7 +148,7 @@ class CombineAll(ToClassifyDataUsingCluster,ReturnParams):
                 model_dict_based_grp.update( {(f'{model_name}',best_score): best_model_}  )
 
             for (key,val),model in model_dict_based_grp.items():
-                print(f'json_training_info_file_path {json_training_info_file_path}')
+                
 
                 model_path=os.path.join(to_stote_model_path,key)
                 self.write_json(json_training_info_file_path=json_training_info_file_path,

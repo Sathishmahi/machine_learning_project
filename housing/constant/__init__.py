@@ -121,3 +121,10 @@ CORR_PLOT_DIR = os.path.join("corr", CURRENT_TIME_STAMP)
 DIST_PLOT_DIR = os.path.join("distplots", CURRENT_TIME_STAMP)
 SCATTER_PLOT_DIR = os.path.join("scatterplots", CURRENT_TIME_STAMP)
 COUNTS_PLOT_DIR = os.path.join("countplots", CURRENT_TIME_STAMP)
+
+
+
+
+### prediction related var
+
+PREDICTION_HELPER_JSON_FILE_NAME='prediction_helper_json.json'

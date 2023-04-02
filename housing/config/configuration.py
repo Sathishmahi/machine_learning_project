@@ -158,10 +158,8 @@ class HousingConfig:
                 DATA_TRANSFORMATION_ROOT_DIR,
                 data_transfomration_config_dic.get(
                     DATA_TRANSFORMATION_TRANSFORMED_PROCESSING_DIR_KEY
-                ),
-                data_transfomration_config_dic.get(
-                    DATA_TRANSFORMATION_TRANSFORMED_PROCESSING_OBJECT_FILE_NAME_KEY
-                ),
+                )
+                
             )
 
             json_info_file_path = os.path.join(
