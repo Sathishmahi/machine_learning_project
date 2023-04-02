@@ -49,6 +49,15 @@ class Pipeline:
                     json.dump(already_present_dic,json_file)
         except Exception as e:
             raise CustomException(error_msg=e, error_details=sys)
+    def to_read_json(self,json_file_path:str)->dict:
+        try:
+            if not os.path.exists(path=json_file_path):
+                raise FileNotFoundError('json file not found')
+            with open(json_file_path) as json_file:
+                json_content=json.load(json_file)
+            return json_content
+        except Exception as e:
+            raise CustomException(error_msg=e, error_details=sys)
     def start_data_injection(self) -> DataInjectionArtifacts:
         try:
             logging.info("Starting data injection pipeline")
@@ -98,7 +107,8 @@ class Pipeline:
 
             feature_engineering_artifacts = (
                 data_transformation.initiate_data_transformation(is_prediction_data=is_prediction_data,prediction_df=predicted_data,
-                save_prediction_data_dir=save_prediction_data_dir,latest_training_data_transformation_info_json_path=latest_training_data_transformation_info_json_path)
+                save_prediction_data_dir=save_prediction_data_dir,saved_model_dir=saved_model_dir,
+                latest_training_data_transformation_info_json_path=latest_training_data_transformation_info_json_path)
             )
             logging.info(
                 f"finish eature engineering and  eature engineering output is [{feature_engineering_artifacts}]"
@@ -132,8 +142,10 @@ class Pipeline:
                         train_models_path:str,model_info_over_all_json_file_path:str)->ModelPushinArtifacts:
         try:
             model_pushing=ModelPushing(model_evaluation_artifacts=model_evalation_artifacts)
-            model_pushing.initiate_model_pushing(cluster_file_path=cluster_file_path,len_of_model_training_dir=len_of_model_training_dir,
-                                                train_models_path=train_models_path,model_info_over_all_json_file_path=model_info_over_all_json_file_path)
+            model_pushing_artifacts=model_pushing.initiate_model_pushing(cluster_file_path=cluster_file_path,len_of_model_training_dir=len_of_model_training_dir,
+                                        train_models_path=train_models_path,model_info_over_all_json_file_path=model_info_over_all_json_file_path)
+
+            return model_pushing_artifacts
         except Exception as e:
             raise CustomException(error_msg=e, error_details=sys) from  e
 
@@ -186,23 +198,23 @@ class Pipeline:
                 model_pushing_artifacts=self.start_model_pusher(model_evalation_artifacts=model_evalation_artifacts,cluster_file_path=cluster_file_path, 
                                                                 len_of_model_training_dir=len_of_model_training_dir,train_models_path=model_dir,
                                                                 model_info_over_all_json_file_path=model_info_over_all_json_file_path)
+                
                 self.to_write_json(json_file_path=PREDICTION_HELPER_JSON_FILE_NAME, content={'model_pushing_artifacts':list(model_pushing_artifacts)})
 
                 print(f"{'='*10}    finish model pushing       {'='*10}")
             else:
-                df=pd.read_csv('/config/workspace/housing/artifact/data_injection/2023_04_02_11_12_43/ingested_data/test/housing.csv',nrows=1000)
-                if not os.path.exists(PREDICTION_HELPER_JSON_FILE_NAME):
-                    raise FileNotFoundError('helper json file not found')
-                with open(PREDICTION_HELPER_JSON_FILE_NAME,'r') as json_file:
-                    feature_engineering_artifacts_list=json.load(json_file).get('feature_engineering_artifacts')
+                df=pd.read_csv('/config/workspace/predict.csv',nrows=1000)
+                feature_engineering_artifacts_list=self.to_read_json(PREDICTION_HELPER_JSON_FILE_NAME).get('feature_engineering_artifacts')
                 model_dir,trained_model_info_json_path=feature_engineering_artifacts_list[2],feature_engineering_artifacts_list[-1]
-                
-                li=self.start_data_transformations(data_injection_artifacts=None, saved_model_dir=model_dir,
+                print(f'model_dir    {model_dir}  trained_model_info_json_path    {trained_model_info_json_path}')
+                prediction_data_list=self.start_data_transformations(data_injection_artifacts=None, saved_model_dir=model_dir,
                 data_validation_artifacts=None,predicted_data=df,is_prediction_data=self.is_predicton,
                 latest_training_data_transformation_info_json_path=trained_model_info_json_path)
-                # model_prediction=ModelPrediction(model_pushing_artifacts)
-                # self.start_data_transformations(data_injection_artifacts, data_validation_artifacts)
-                # model_prediction.initiate_data_prediction(predicted_data=pd.read_csv())
+                model_pushing_artifacts_list=self.to_read_json(PREDICTION_HELPER_JSON_FILE_NAME).get('model_pushing_artifacts')
+                
+                model_prediction=ModelPrediction(model_pushing_artifacts_list=model_pushing_artifacts_list)
+                df=model_prediction.initiate_data_prediction(predicted_data=pd.read_csv(prediction_data_list[0]))
+                print(df)
         except Exception as e:
             logging.error(e)
             raise CustomException(e, sys) from e

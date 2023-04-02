@@ -132,3 +132,5 @@ logs/
 test.*
 artifact/
 all_plots/
+*.csv
+save_prediction_data_dir

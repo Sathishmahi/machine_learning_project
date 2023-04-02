@@ -122,7 +122,7 @@ DIST_PLOT_DIR = os.path.join("distplots", CURRENT_TIME_STAMP)
 SCATTER_PLOT_DIR = os.path.join("scatterplots", CURRENT_TIME_STAMP)
 COUNTS_PLOT_DIR = os.path.join("countplots", CURRENT_TIME_STAMP)
 
-
+OUT_COME_COLUMN_NAME="median_house_value"
 
 
 ### prediction related var

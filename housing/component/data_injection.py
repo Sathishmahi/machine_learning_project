@@ -98,8 +98,8 @@ class DataInjection:
             test_file_path = os.path.join(test_data_dir, file_name)
 
             if strat_test_data is not None and strat_train_data is not None:
-                strat_test_data.to_csv(test_file_path)
-                strat_train_data.to_csv(train_file_path)
+                strat_test_data.to_csv(test_file_path,index=False)
+                strat_train_data.to_csv(train_file_path,index=False)
             data_injecton_artifacts = DataInjectionArtifacts(
                 train_file_path=train_file_path,
                 test_file_path=test_file_path,

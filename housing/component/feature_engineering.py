@@ -18,7 +18,6 @@ import json
 import pickle
 import pandas as pd
 
-
 class DataTransformation:
     def __init__(
         self,
@@ -27,13 +26,15 @@ class DataTransformation:
         config: HousingConfig = HousingConfig(),
         is_prediction_data=False,
         
+        
     ):
         try:
             if not is_prediction_data:
                 self.data_injection_artifacts = data_injection_artifacts
                 self.data_transformation_config = config.model_transformation_config
                 schema_file_path=config.data_validation_config.schema_file_path
-                target_column=util.read_yaml(file_path=schema_file_path).get(TARGET_COLUMN_KEY)
+                self.target_column=util.read_yaml(file_path=schema_file_path).get(TARGET_COLUMN_KEY)
+                self.out_column_data=None
             # self.y_data=df.drop(columns=y_data)
         except Exception as e:
             raise CustomException(e, sys) from e
@@ -133,8 +134,8 @@ class DataTransformation:
         is_train_data: bool = True,
     ):
         try:
-            os.makedirs(model_save_dir, exist_ok=True)
-            os.makedirs(train_data_dir, exist_ok=True)
+            # os.makedirs(model_save_dir, exist_ok=True)
+            # os.makedirs(train_data_dir, exist_ok=True)
             os.makedirs(test_data_dir, exist_ok=True)
             print(f'model svaed dir name ====   {model_save_dir}')
             df_new = df.copy()
@@ -178,6 +179,7 @@ class DataTransformation:
                     all_na_val_df[na_column].isna() == False
                 ].index
                 trainded_model_path = os.listdir(model_save_dir)[0]
+                print(f'trainded_model_path   {trainded_model_path}   model_save_dir    {model_save_dir} ')
                 print('file path    ',os.path.join(model_save_dir, trainded_model_path))
                 with open(
                     os.path.join(model_save_dir, trainded_model_path), "rb"
@@ -205,7 +207,13 @@ class DataTransformation:
         is_train_data: bool = True,
     ):
         try:
+            # if self.is_prediction_data:
+            
+            
             df_new = df.copy()
+            if self.target_column in list(df_new.columns):
+                self.out_column_data=df_new[self.target_column]
+                df_new=df_new.drop(columns=self.target_column)
             if is_train_data:
                 os.makedirs(train_data_dir, exist_ok=True)
                 all_multicolinearity_columns_keys = self.read_json(
@@ -240,7 +248,7 @@ class DataTransformation:
                     json.dump(already_present_dict, json_file)
 
                 return train_file_path
-
+            os.makedirs(test_data_dir, exist_ok=True)
             with open(json_file_path, "r") as json_file:
                 all_multi_colinearity_columns = json.load(json_file).get(
                     AFTER_HANDLE_THE_MULTICOLINEARITY_TRAIN_DF_COLUMNS_LIST
@@ -249,7 +257,7 @@ class DataTransformation:
                 col for col in all_multi_colinearity_columns if col in df_new.columns
             ]
             df_new.drop(columns=all_remove_columns_list)
-            os.makedirs(test_data_dir, exist_ok=True)
+            
             file_name = "to_handle_mulitcolinerity_test.csv"
             test_data_file_path = os.path.join(test_data_dir, file_name)
             df_new.to_csv(test_data_file_path, index=False)
@@ -381,8 +389,10 @@ class DataTransformation:
         json_info_file_path: str,
         file_name="final_data_train.csv",
         is_train_data=True,
+        is_predicted_data=False
     ) -> str:
         try:
+            after_transformed_data_path_list = []
             df_new=df.copy()
             if is_train_data:
                 os.makedirs(train_data_dir, exist_ok=True)
@@ -394,6 +404,7 @@ class DataTransformation:
               
                 df_new.drop(columns=removed_column_list, inplace=True)
                 train_file_path = os.path.join(train_data_dir, file_name)
+                df_new[self.target_column]=self.out_column_data
                 df_new.to_csv(train_file_path, index=False)
                 already_present_dict = dict()
                 if os.path.exists(json_info_file_path):
@@ -417,6 +428,8 @@ class DataTransformation:
             df_new = df_new.loc[:, after_remove_one_std_columns_list]
             file_name = "final_data_test.csv"
             test_file_path = os.path.join(test_data_dir, file_name)
+            if not is_predicted_data:
+                df_new[self.target_column]=self.out_column_data
             df_new.to_csv(test_file_path, index=False)
             return test_file_path
 
@@ -426,6 +439,7 @@ class DataTransformation:
     def initiate_data_transformation(self,saved_model_dir:str=None,latest_training_data_transformation_info_json_path:str=None,
                                     is_prediction_data=False,save_prediction_data_dir='prediction_data',prediction_df=None,):
         try:
+            after_transformed_data_path_list=[]
             if not is_prediction_data:
                 train_data_dir = self.data_transformation_config.transformed_train_dir
                 test_data_dir = self.data_transformation_config.transformed_test_dir
@@ -435,15 +449,15 @@ class DataTransformation:
                 )
                 train_file_path = self.data_injection_artifacts.train_file_path
                 test_file_path = self.data_injection_artifacts.test_file_path
+                
                 df_train = pd.read_csv(train_file_path)
                 df_test = pd.read_csv(test_file_path)
-
                 combine_list = [[df_train, True], [df_test, False]]
-                after_transformed_data_path_list = []
+                
                 # df,is_train_data=combine_list[0][0],combine_list[0][1]
             else:
                 train_data_dir = None
-                test_data_dir = save_prediction_data_dir
+                test_data_dir = "save_prediction_data_dir"
                 json_info_file_path = latest_training_data_transformation_info_json_path
                 saved_model_dir = saved_model_dir
                 train_file_path = None
@@ -480,14 +494,18 @@ class DataTransformation:
                     is_train_data=is_train_data,
                 )
                 print(f"finish handle cat features")
-                handle_na_values_path = self.to_handle_na_values(
-                    pd.read_csv(handle_cat_columns_path),
-                    saved_model_dir,
-                    train_data_dir,
-                    test_data_dir,
-                    is_train_data=is_train_data,
-                )
-                print("finish handle na values")
+                handle_na_values_path=handle_cat_columns_path
+                df=pd.read_csv(handle_cat_columns_path)
+                print(df.isna().sum())
+                if not is_prediction_data:
+                    handle_na_values_path = self.to_handle_na_values(
+                        df,
+                        saved_model_dir,
+                        train_data_dir,
+                        test_data_dir,
+                        is_train_data=is_train_data,
+                    )
+                    print("finish handle na values")
                 after_handle_non_normal_dist_data_path = (
                     self.to_handle_non_normal_distribution(
                         pd.read_csv(handle_na_values_path),
@@ -506,6 +524,7 @@ class DataTransformation:
                     test_data_dir=test_data_dir,
                     json_info_file_path=json_info_file_path,
                     is_train_data=is_train_data,
+                    is_predicted_data=is_prediction_data
                 )
                 print("finish data transformation")
                 after_transformed_data_path_list.append(final_data_path)
