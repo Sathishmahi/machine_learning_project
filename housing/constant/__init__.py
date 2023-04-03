@@ -120,7 +120,7 @@ CORR_PLOT_DIR = os.path.join("corr", CURRENT_TIME_STAMP)
 DIST_PLOT_DIR = os.path.join("distplots", CURRENT_TIME_STAMP)
 SCATTER_PLOT_DIR = os.path.join("scatterplots", CURRENT_TIME_STAMP)
 COUNTS_PLOT_DIR = os.path.join("countplots", CURRENT_TIME_STAMP)
-ROOT_DIR_PLOTS=os.path('artifact','all_plots')
+ROOT_DIR_PLOTS=os.path.join('artifact','all_plots')
 OUT_COME_COLUMN_NAME="median_house_value"
 
 

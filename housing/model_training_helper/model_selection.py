@@ -221,7 +221,28 @@ class CombineAll(ToClassifyDataUsingCluster,ReturnParams):
     def to_return_best_model(self,df:pd.DataFrame,target_col_name:str,to_stote_model_path:str,test_data:pd.DataFrame,
                           json_training_info_file_path:str,cluster_file_path:str,overall_model_info_json_file_path:str,
                           n_clusters=1,base_accuracy=0.6)->ModelTrainingArtifacts:
-        
+        """
+        to_return_best_model to return best model score model
+
+        Note :base_score accept for only model test score
+
+        Args:
+            df (pd.DataFrame): data 
+            target_col_name (str): target column name
+            to_stote_model_path (str): path to store the trained cluster model
+            test_data (pd.DataFrame): test data
+            json_training_info_file_path (str): json file path for store all training model info
+            cluster_file_path (str): cluster file path
+            overall_model_info_json_file_path (str): json file path for over all model info json
+            n_clusters (int, optional): no of cluster classify data. Defaults to 1.
+            base_accuracy (float, optional): min test accracy for trained model. Defaults to 0.6.
+
+        Raises:
+            CustomException: 
+
+        Returns:
+            ModelTrainingArtifacts: all trained model path
+        """
         try:
             cluster_data=self.to_classify_data(df,cluster_file_path,n_clusters=n_clusters).groupby('cluster_no')
             test_df=self.predict_data(test_data,cluster_file_path)

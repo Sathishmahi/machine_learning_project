@@ -10,4 +10,5 @@ seaborn
 lightgbm
 xgboost
 pyarrow
+numpyencoder
 -e .
