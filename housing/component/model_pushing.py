@@ -1,17 +1,26 @@
-import os,sys
 import json
+import os
 import pickle
 import shutil
-from housing.entity.artifacts_entity import ModelEvaluationArtifacts,ModelPushinArtifacts
+import sys
+
 from housing.config.configuration import HousingConfig
-from housing.logger import logging
+from housing.entity.artifacts_entity import (ModelEvaluationArtifacts,
+                                             ModelPushinArtifacts)
 from housing.exception import CustomException
+from housing.logger import logging
 
 
 class ModelPushing:
     def __init__(self,model_evaluation_artifacts:ModelEvaluationArtifacts,
                 config:HousingConfig=HousingConfig())->None:
+        """
+        ModelPushing to push the models into production
 
+        Args:
+            model_evaluation_artifacts (ModelEvaluationArtifacts): model_evaluation_artifacts  
+            config (HousingConfig, optional): all config class. Defaults to HousingConfig().
+        """
         
         self.model_pushing_config=config.model_pusher_config
         self.model_evalation_artifacts=model_evaluation_artifacts
@@ -20,7 +29,23 @@ class ModelPushing:
 
     def initiate_model_pushing(self,cluster_file_path:str,len_of_model_training_dir:int,
                                 model_info_over_all_json_file_path:str,train_models_path=None,)->ModelPushinArtifacts:
+        """
+       initiate_model_pushing  to change the all less perform models
 
+        Args:
+            cluster_file_path (str): cluster file path
+            len_of_model_training_dir (int): len of model training dir whether len == 1  first time training was /
+            happen so all models directly move to production
+
+            model_info_over_all_json_file_path (str): json file path for all models info
+            train_models_path (_type_, optional): all currently trained models path. Defaults to None.
+
+        Raises:
+            CustomException: 
+
+        Returns:
+            ModelPushinArtifacts: to return path for cluster and production models 
+        """
         current_model_report_json_path=self.model_evalation_artifacts.model_evaluation_current_model_info_file_path
         try:
 
@@ -55,6 +80,7 @@ class ModelPushing:
                     new_dic=dict(zip(alternative_keys,dic.values()))
                     json.dump(new_dic,json_file)
                 return model_pushing_artifacts
+                
             if len_of_model_training_dir>=2:
                 
                 if not self.to_change_or_not:
@@ -75,9 +101,6 @@ class ModelPushing:
                     alternative_keys.append(dst_copy)
                     score_get_key.append(new_file)
                     shutil.copyfile(src_copy, dst_copy)
-                
-                print(f'key =======   {keys}')
-                print(f'alternative keys =======   {alternative_keys}')
                 dic=dict()
                 with open(current_model_report_json_path,'r') as json_file:
                     dic=json.load(json_file)
@@ -86,7 +109,6 @@ class ModelPushing:
                     for key,alter_key,get_key in zip(keys,alternative_keys,score_get_key):
                         dic.pop(key)
                         dic.update({alter_key:json_content.get(get_key)})
-                    print(f'final updated dic   ==============  {dic}')
                     json.dump(dic,json_file)
                 
                 return model_pushing_artifacts

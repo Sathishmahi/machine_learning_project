@@ -1,24 +1,26 @@
+import json
+import os
+import pickle
+import sys
+
+import numpy as np
+import pandas as pd
+import pyarrow
+from sklearn.neighbors import KNeighborsRegressor
+
 from housing.config.configuration import HousingConfig
+from housing.constant import *
+from housing.entity.artifacts_entity import (DataInjectionArtifacts,
+                                             DataValidationArtifacts,
+                                             FeatureEngineeringArtifacts)
+from housing.exception import CustomException
 from housing.logger import logging
 from housing.utils import util
-from housing.exception import CustomException
 from housing.utils.util import read_yaml
-from housing.entity.artifacts_entity import (
-    DataInjectionArtifacts,
-    FeatureEngineeringArtifacts,
-    DataValidationArtifacts,
-)
-from housing.logger import logging
-from housing.exception import CustomException
-import numpy as np
-from sklearn.neighbors import KNeighborsRegressor
-from housing.constant import *
-import os, sys
-import json
-import pickle
-import pandas as pd
+
 
 class DataTransformation:
+
     def __init__(
         self,
         data_injection_artifacts: DataInjectionArtifacts,
@@ -28,6 +30,19 @@ class DataTransformation:
         
         
     ):
+        """
+        DataTransformation to transform a data by using final report json 
+        this report generate from EDA note book
+
+        Args:
+            data_injection_artifacts (DataInjectionArtifacts): DataInjectionArtifacts --  all file paths 
+            data_validation_artifacts (DataValidationArtifacts): DataValidationArtifacts --- final report file path
+            config (HousingConfig, optional): all config class. Defaults to HousingConfig().
+            is_prediction_data (bool, optional): given data predicted or not. Defaults to False.
+
+        Raises:
+            CustomException: 
+        """
         try:
             if not is_prediction_data:
                 self.data_injection_artifacts = data_injection_artifacts
@@ -39,9 +54,18 @@ class DataTransformation:
         except Exception as e:
             raise CustomException(e, sys) from e
 
-    def read_json(self, key: str) -> dict:
+    def read_json(self, key: str,final_report_path="housing/component/final_report.json") -> dict:
+        """
+        read_json to read a final report json file 
+
+        Args:
+            key (str): key for json content 
+
+        Returns:
+            dict: to return the final report json content
+        """
         # self.data_validation_artifacts.json_report_file_path
-        with open("housing/component/final_report.json", "r") as json_file:
+        with open(final_report_path, "r") as json_file:
             json_content = json.load(json_file)
         return json_content.get(key)
 
@@ -51,11 +75,29 @@ class DataTransformation:
         transformed_train_data_dir: str,
         transformed_test_data_dir: str,
         json_file_path: str,
-        file_name="to_handle_cat_features_train.csv",
+        file_name="to_handle_cat_features_train.parquet",
         thersold: int = 15,
         is_train_data=True,
         
     ):
+        """
+        to_handle_cat_features to handle the all categorical columns present in the data 
+
+        Args:
+            df (pd.DataFrame): data frame 
+            transformed_train_data_dir (str): after handle the train data to store path
+            transformed_test_data_dir (str): after handle the train data to store path
+            json_file_path (str): json file to store all train transform cotents
+            file_name (str, optional): fle for after handle cat features. Defaults to "to_handle_cat_features_train.parquet".
+            thersold (int, optional): how many no of uniques to consier that columns as categorcal column. Defaults to 15.
+            is_train_data (bool, optional): whether data was train or test data. Defaults to True.
+
+        Raises:
+            CustomException: 
+
+        Returns:
+            None
+        """
         try:
             df_new = df.copy()
             all_dicreate_col_list = self.read_json(ALL_DISCRETE_COLUMNS_KEY)
@@ -86,7 +128,7 @@ class DataTransformation:
                     already_present_dict.update({HANDLE_CAT_FEATURES_DICT: mapped_dict})
                     json.dump(already_present_dict, json_file)
                 file_path = os.path.join(transformed_train_data_dir, file_name)
-                df_new.to_csv(file_path, index=False)
+                df_new.to_parquet(file_path,engine='pyarrow',index=False,compression='gzip')
 
                 return file_path
 
@@ -96,9 +138,9 @@ class DataTransformation:
             for column in all_discrete_columns:
                 mapped_dic = json_content.get(column)
                 df_new[column] = df_new[column].map(mapped_dic)
-            file_name = "to_handle_cat_features_test.csv"
+            file_name = "to_handle_cat_features_test.parquet"
             test_data_file_path = os.path.join(transformed_test_data_dir, file_name)
-            df_new.to_csv(test_data_file_path, index=False)
+            df_new.to_parquet(test_data_file_path,engine='pyarrow', index=False,compression='gzip')
 
             return test_data_file_path
 
@@ -114,6 +156,23 @@ class DataTransformation:
         model_save_or_not=False,
         k=5,
     ) -> np.array:
+        """
+        helper functioin for handle null values
+
+        Args:
+            x_train (pd.DataFrame): train x data 
+            y_train (pd.DataFrame): train y data 
+            x_test (pd.DataFrame): test x data 
+            model_path (str): knn reg model path
+            model_save_or_not (bool, optional): whether trained knn model save or not. Defaults to False.
+            k (int, optional): no of neighbours(parameter of knn reg) . Defaults to 5.
+
+        Raises:
+            CustomException: 
+
+        Returns:
+            np.array: to return all prediction output
+        """
         try:
             knn = KNeighborsRegressor(n_neighbors=k)
             knn.fit(x_train, y_train)
@@ -130,14 +189,33 @@ class DataTransformation:
         model_save_dir: str,
         train_data_dir: str,
         test_data_dir: str,
-        file_name="to_handle_na_values_train.csv",
+        file_name="to_handle_na_values_train.parquet",
         is_train_data: bool = True,
-    ):
+    )->str:
+        """
+        to_handle_na_values to handle the all null value present in data 
+
+        Args:
+            df (pd.DataFrame): na present data 
+            model_save_dir (str): knn reg model store path
+            train_data_dir (str): after handle the na values to store a train data 
+            test_data_dir (str): after handle the na vlaues dir to store a tets data 
+            file_name (str, optional): after handle the na values file path. Defaults to "to_handle_na_values_train.parquet".
+            is_train_data (bool, optional): whether given data train or test data. Defaults to True.
+
+        Note: training data (all non null data consider as train data)
+
+        Raises:
+            CustomException: 
+
+        Returns:
+            str : path of after handle na values data 
+        """
         try:
-            # os.makedirs(model_save_dir, exist_ok=True)
-            # os.makedirs(train_data_dir, exist_ok=True)
+            if model_save_dir and train_data_dir:
+                os.makedirs(model_save_dir, exist_ok=True)
+                os.makedirs(train_data_dir, exist_ok=True)
             os.makedirs(test_data_dir, exist_ok=True)
-            print(f'model svaed dir name ====   {model_save_dir}')
             df_new = df.copy()
             all_na_columns_list = self.read_json(ALL_NULL_VALUES_COLUMNS_KEY)
             all_na_columns = [column[0] for column in all_na_columns_list]
@@ -151,7 +229,6 @@ class DataTransformation:
                 save_or_not = True
                 for na_column in all_na_columns:
                     model_file_path = os.path.join(model_save_dir, f"{na_column}.pkl")
-                    print(f'model file path of knn ======     ',{model_file_path})
                     na_idx = all_na_val_df[na_column][
                         all_na_val_df[na_column].isna()
                     ].index
@@ -169,7 +246,7 @@ class DataTransformation:
                     df_new[na_column].loc[na_idx] = prediction_values
 
                 train_data_file_path = os.path.join(train_data_dir, file_name)
-                df_new.to_csv(train_data_file_path, index=False)
+                df_new.to_parquet(train_data_file_path,engine='pyarrow', index=False,compression='gzip')
 
                 return train_data_file_path
 
@@ -187,9 +264,9 @@ class DataTransformation:
                     trained_model = pickle.load(pickle_file)
                 predicted_value = trained_model.predict(all_non_na_val_df.loc[na_idx])
                 df_new[na_column].loc[na_idx] = predicted_value
-            file_name = "to_handle_na_values_test.csv"
+            file_name = "to_handle_na_values_test.parquet"
             test_data_file_path = os.path.join(test_data_dir, file_name)
-            df_new.to_csv(test_data_file_path, index=False)
+            df_new.to_parquet(test_data_file_path,engine='pyarrow', index=False,compression='gzip')
             
             return test_data_file_path
 
@@ -203,7 +280,7 @@ class DataTransformation:
         train_data_dir: str,
         test_data_dir: str,
         json_file_path: str,
-        file_name="to_handle_mulitcolinerity_train.csv",
+        file_name="to_handle_mulitcolinerity_train.parquet",
         is_train_data: bool = True,
     ):
         try:
@@ -231,7 +308,7 @@ class DataTransformation:
                 ]
                 df_new.drop(columns=all_remove_columns_list)
                 train_file_path = os.path.join(train_data_dir, file_name)
-                df_new.to_csv(train_file_path, index=False)
+                df_new.to_parquet(train_file_path, index=False,engine='pyarrow',compression='gzip')
                 already_present_dict = dict()
                 if os.path.exists(json_file_path):
             
@@ -258,9 +335,9 @@ class DataTransformation:
             ]
             df_new.drop(columns=all_remove_columns_list)
             
-            file_name = "to_handle_mulitcolinerity_test.csv"
+            file_name = "to_handle_mulitcolinerity_test.parquet"
             test_data_file_path = os.path.join(test_data_dir, file_name)
-            df_new.to_csv(test_data_file_path, index=False)
+            df_new.to_parquet(test_data_file_path,engine='pyarrow', index=False,compression='gzip')
             
             return test_data_file_path
 
@@ -274,9 +351,28 @@ class DataTransformation:
         train_data_dir: str,
         test_data_dir: str,
         json_file_path: str,
-        file_name="to_handle_negative_correlation_train.csv",
+        file_name="to_handle_negative_correlation_train.parquet",
         is_train_data: bool = True,
-    ):
+    )->str:
+        """
+        to_handle_negative_correlation to handle the all negative correlation columns (vs target column)
+        
+
+        Args:
+            df (pd.DataFrame): data for hadle the neg corr
+            model_save_dir (str): dir to store a model
+            train_data_dir (str): dir to store after handle the neg corr train data
+            test_data_dir (str): dir to store after handle the neg corr test data
+            json_file_path (str): to store a all training data transformation info help us to handle the test data 
+            file_name (str, optional): filename for after handle the neg corr data. Defaults to "to_handle_negative_correlation_train.parquet".
+            is_train_data (bool, optional): whether given data train or test data. Defaults to True.
+
+        Raises:
+            CustomException: 
+
+        Returns:
+            str: after handle the neg corr data path
+        """
         try:
             df_new = df.copy()
             if is_train_data:
@@ -305,7 +401,7 @@ class DataTransformation:
                         }
                     )
                     json.dump(already_present_dict, json_file)
-                df_new.to_csv(train_file_path, index=False)
+                df_new.to_parquet(train_file_path,engine='pyarrow', index=False,compression='gzip')
                 return train_file_path
 
             with open(json_file_path, "r") as json_file:
@@ -313,10 +409,10 @@ class DataTransformation:
                     AFTER_HANDLE_NEGATIVE_CORRELATION_TRAIN_DF_COLUMNS_LIST
                 )
             df_new = df_new.loc[:, all_remove_colunms_list]
-            file_name = "to_handle_negative_correlation_test.csv"
+            file_name = "to_handle_negative_correlation_test.parquet"
             os.makedirs(test_data_dir, exist_ok=True)
             test_data_file_path = os.path.join(test_data_dir, file_name)
-            df_new.to_csv(test_data_file_path, index=False)
+            df_new.to_parquet(test_data_file_path,engine='pyarrow', index=False,compression='gzip')
             return test_data_file_path
 
         except Exception as e:
@@ -330,9 +426,29 @@ class DataTransformation:
         test_data_dir: str,
         json_file_path: str,
         thersold: float = 2.0,
-        file_name="to_handle_non_normal_distribution_train.csv",
+        file_name="to_handle_non_normal_distribution_train.parquet",
         is_train_data: bool = True,
-    ):
+    )->str:
+        """
+        to_handle_non_normal_distribution to handle the non normal distribution columns (like log-normal dist)
+
+        Args:
+            df (pd.DataFrame): data for handle the dist 
+            model_save_dir (str): dir to store a model
+            train_data_dir (str): dir to store after handle the neg corr train data
+            test_data_dir (str): dir to store after handle the neg corr test data
+            json_file_path (str): to store a all training data transformation info help us to handle the test data 
+            thersold (float, optional): thersold for skewness of data  . Defaults to 2.0.
+            file_name (str, optional): filename for after handle dist data . Defaults to "to_handle_non_normal_distribution_train.parquet".
+            is_train_data (bool, optional): whether given data train or test data. Defaults to True.
+
+
+        Raises:
+            CustomException: 
+
+        Returns:
+            str: after handle dist of data file path
+        """
         try:
             df_new = df.copy()
             if is_train_data:
@@ -360,7 +476,7 @@ class DataTransformation:
                     )
                     json.dump(already_present_dict, json_file)
 
-                df_new.to_csv(train_file_path, index=False)
+                df_new.to_parquet(train_file_path,engine='pyarrow', index=False,compression='gzip')
                 return train_file_path
 
             with open(json_file_path, "r") as json_file:
@@ -373,9 +489,9 @@ class DataTransformation:
             ]
             for col in all_transormation_columns:
                 df_new[col] = np.log(df_new[col])
-            file_name = "to_handle_non_normal_distribution_test.csv"
+            file_name = "to_handle_non_normal_distribution_test.parquet"
             test_file_path = os.path.join(test_data_dir, file_name)
-            df_new.to_csv(test_file_path, index=False)
+            df_new.to_parquet(test_file_path,engine='pyarrow', index=False,compression='gzip')
             return test_file_path
 
         except Exception as e:
@@ -387,10 +503,29 @@ class DataTransformation:
         train_data_dir: str,
         test_data_dir: str,
         json_info_file_path: str,
-        file_name="final_data_train.csv",
+        file_name="final_data_train.parquet",
         is_train_data=True,
         is_predicted_data=False
     ) -> str:
+        """
+        to_remove_unwnated_columns to remove all unwnated columns like zero std columns 
+
+        Args:
+            df (pd.DataFrame): data for handle the dist 
+            model_save_dir (str): dir to store a model
+            train_data_dir (str): dir to store after handle the neg corr train data
+            test_data_dir (str): dir to store after handle the neg corr test data
+            json_file_path (str): to store a all training data transformation info help us to handle the test data 
+            file_name (str, optional): filename for after handle dist data . Defaults to "final_data_train.parquet".
+            is_train_data (bool, optional): whether given data train or test data. Defaults to True.
+            is_predicted_data(bool, optional) : whether given data predicted data or not
+
+        Raises:
+            CustomException: 
+
+        Returns:
+            str: to return after remove the unwnated columns data 
+        """
         try:
             after_transformed_data_path_list = []
             df_new=df.copy()
@@ -405,7 +540,7 @@ class DataTransformation:
                 df_new.drop(columns=removed_column_list, inplace=True)
                 train_file_path = os.path.join(train_data_dir, file_name)
                 df_new[self.target_column]=self.out_column_data
-                df_new.to_csv(train_file_path, index=False)
+                df_new.to_parquet(train_file_path, index=False,compression='gzip',engine='pyarrow')
                 already_present_dict = dict()
                 if os.path.exists(json_info_file_path):
                     with open(json_info_file_path) as json_file:
@@ -426,18 +561,28 @@ class DataTransformation:
                 if col in df_new.columns
             ]
             df_new = df_new.loc[:, after_remove_one_std_columns_list]
-            file_name = "final_data_test.csv"
+            file_name = "final_data_test.parquet"
             test_file_path = os.path.join(test_data_dir, file_name)
             if not is_predicted_data:
                 df_new[self.target_column]=self.out_column_data
-            df_new.to_csv(test_file_path, index=False)
+            df_new.to_parquet(test_file_path,engine='pyarrow', index=False,compression='gzip')
             return test_file_path
 
         except Exception as e:
             raise CustomException(error_msg=e, error_details=sys)
 
     def initiate_data_transformation(self,saved_model_dir:str=None,latest_training_data_transformation_info_json_path:str=None,
-                                    is_prediction_data=False,save_prediction_data_dir='prediction_data',prediction_df=None,):
+                                    is_prediction_data=False,save_prediction_data_dir='prediction_data',prediction_df=None)->FeatureEngineeringArtifacts:
+        
+        """
+        initiate_data_transformation to combine all functions
+
+        Raises:
+            CustomException: 
+
+        Returns:
+            FeatureEngineeringArtifacts: all file paths to generate this FeatureEngineering components
+        """
         try:
             after_transformed_data_path_list=[]
             if not is_prediction_data:
@@ -450,8 +595,8 @@ class DataTransformation:
                 train_file_path = self.data_injection_artifacts.train_file_path
                 test_file_path = self.data_injection_artifacts.test_file_path
                 
-                df_train = pd.read_csv(train_file_path)
-                df_test = pd.read_csv(test_file_path)
+                df_train = pd.read_parquet(train_file_path)
+                df_test = pd.read_parquet(test_file_path)
                 combine_list = [[df_train, True], [df_test, False]]
                 
                 # df,is_train_data=combine_list[0][0],combine_list[0][1]
@@ -478,7 +623,7 @@ class DataTransformation:
                 )
                 print(f"finish multi colinerity")
                 handle_negative_corr_path = self.to_handle_negative_correlation(
-                    pd.read_csv(multi_file_path),
+                    pd.read_parquet(multi_file_path),
                     saved_model_dir,
                     train_data_dir,
                     test_data_dir,
@@ -487,7 +632,7 @@ class DataTransformation:
                 )
                 print(f"finish to handle negative correlation")
                 handle_cat_columns_path = self.to_handle_cat_features(
-                    pd.read_csv(handle_negative_corr_path),
+                    pd.read_parquet(handle_negative_corr_path),
                     train_data_dir,
                     test_data_dir,
                     json_info_file_path,
@@ -495,7 +640,7 @@ class DataTransformation:
                 )
                 print(f"finish handle cat features")
                 handle_na_values_path=handle_cat_columns_path
-                df=pd.read_csv(handle_cat_columns_path)
+                df=pd.read_parquet(handle_cat_columns_path)
                 print(df.isna().sum())
                 if not is_prediction_data:
                     handle_na_values_path = self.to_handle_na_values(
@@ -508,7 +653,7 @@ class DataTransformation:
                     print("finish handle na values")
                 after_handle_non_normal_dist_data_path = (
                     self.to_handle_non_normal_distribution(
-                        pd.read_csv(handle_na_values_path),
+                        pd.read_parquet(handle_na_values_path),
                         saved_model_dir,
                         train_data_dir,
                         test_data_dir,
@@ -519,7 +664,7 @@ class DataTransformation:
 
                 print(f"finish to handle non normal dist")
                 final_data_path = self.to_remove_unwnated_columns(
-                    df=pd.read_csv(after_handle_non_normal_dist_data_path),
+                    df=pd.read_parquet(after_handle_non_normal_dist_data_path),
                     train_data_dir=train_data_dir,
                     test_data_dir=test_data_dir,
                     json_info_file_path=json_info_file_path,

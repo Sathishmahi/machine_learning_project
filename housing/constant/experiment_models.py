@@ -1,13 +1,10 @@
-from sklearn.linear_model import ElasticNet, Ridge, Lasso
-from sklearn.ensemble import (
-    RandomForestRegressor,
-    GradientBoostingRegressor,
-    AdaBoostRegressor,
-)
 from lightgbm import LGBMRegressor
-from xgboost import XGBRegressor
+from sklearn.ensemble import (AdaBoostRegressor, GradientBoostingRegressor,
+                              RandomForestRegressor)
+from sklearn.linear_model import ElasticNet, Lasso, Ridge
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
+from xgboost import XGBRegressor
 
 all_models_dict = {
     "lgbmregressor": LGBMRegressor(),

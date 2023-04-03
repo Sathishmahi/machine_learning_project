@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
 
-
 ROOT_DIR = os.getcwd()
 CONFIG_DIR = "config"
 CONFIG_FILE_NAME = "config.yaml"
@@ -121,10 +120,20 @@ CORR_PLOT_DIR = os.path.join("corr", CURRENT_TIME_STAMP)
 DIST_PLOT_DIR = os.path.join("distplots", CURRENT_TIME_STAMP)
 SCATTER_PLOT_DIR = os.path.join("scatterplots", CURRENT_TIME_STAMP)
 COUNTS_PLOT_DIR = os.path.join("countplots", CURRENT_TIME_STAMP)
-
+ROOT_DIR_PLOTS=os.path('artifact','all_plots')
 OUT_COME_COLUMN_NAME="median_house_value"
 
 
 ### prediction related var
 
 PREDICTION_HELPER_JSON_FILE_NAME='prediction_helper_json.json'
+
+
+### size checking related var
+
+SIZE_CHECKING_YAML_FILE_PATH='/config/size_checking.yaml'
+FLOAT16_MIN_KEY="float16_min"
+FLOAT16_MAX_KEY="float16_max"
+FLOAT32_MIN_KEY="float32_min"
+FLOAT32_MAX_KEY="float32_max"
+CATEGORY_LIMIT_KEY="category_thersold"

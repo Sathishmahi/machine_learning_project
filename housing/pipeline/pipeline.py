@@ -1,32 +1,40 @@
+import json
 import os
 import sys
-import json
+
 import pandas as pd
-from housing.entity.config_entity import DataTransformationConfig
-from housing.config.configuration import HousingConfig
+
 from housing.component.data_injection import DataInjection
 from housing.component.data_validation import DataValidation
 from housing.component.feature_engineering import DataTransformation
-from housing.component.model_training import ModelTraining
-from housing.logger import logging
 from housing.component.model_evaluation import ModelEvaluation
 from housing.component.model_pushing import ModelPushing
-from housing.exception import CustomException
-from housing.entity.artifacts_entity import (
-    DataInjectionArtifacts,
-    FeatureEngineeringArtifacts,
-    DataValidationArtifacts,
-    ModelTrainingArtifacts,
-    ModelEvaluationArtifacts,
-    ModelPushinArtifacts
-)
-from housing.entity.config_entity import DataIngestionConfig
-from housing.pipeline.prediction_pipeline import ModelPrediction
+from housing.component.model_training import ModelTraining
+from housing.component.size_check import CheckDataSize
+from housing.config.configuration import HousingConfig
 from housing.constant import PREDICTION_HELPER_JSON_FILE_NAME
+from housing.entity.artifacts_entity import (DataInjectionArtifacts,
+                                             DataValidationArtifacts,
+                                             FeatureEngineeringArtifacts,
+                                             ModelEvaluationArtifacts,
+                                             ModelPushinArtifacts,
+                                             ModelTrainingArtifacts)
+from housing.entity.config_entity import (DataIngestionConfig,
+                                          DataTransformationConfig)
+from housing.exception import CustomException
+from housing.logger import logging
+from housing.pipeline.prediction_pipeline import ModelPrediction
 
 
 class Pipeline:
-    def __init__(self, config: HousingConfig = HousingConfig(),is_predicton:bool=True) -> None:
+    def __init__(self, config: HousingConfig = HousingConfig(),is_predicton:bool=False) -> None:
+
+        """
+        Pipeline class to organize all training and prediction components
+
+        Raises:
+            CustomException
+        """
         try:
             self.config = config
             self.is_predicton=is_predicton
@@ -36,6 +44,16 @@ class Pipeline:
 
 
     def to_write_json(self,json_file_path:str,content:dict):
+        """
+        this function to write a content into given json file
+
+        Args:
+            json_file_path (str): json file path
+            content (dict): content to write
+
+        Raises:
+            CustomException
+        """
         try:
             already_present_dic=dict()
             if os.path.exists(json_file_path):
@@ -44,12 +62,24 @@ class Pipeline:
                 with open(json_file_path,'w') as json_file:
                     already_present_dic.update(content)
                     json.dump(already_present_dic,json_file)
-
+            already_present_dic.update(content)
             with open(json_file_path,'w') as json_file:
                     json.dump(already_present_dic,json_file)
         except Exception as e:
             raise CustomException(error_msg=e, error_details=sys)
     def to_read_json(self,json_file_path:str)->dict:
+        """
+        this function to read a content into given json file
+        Args:
+            json_file_path (str): json file path
+
+        Raises:
+            FileNotFoundError
+            CustomException:
+
+        Returns:
+            dict: json content 
+        """
         try:
             if not os.path.exists(path=json_file_path):
                 raise FileNotFoundError('json file not found')
@@ -88,6 +118,12 @@ class Pipeline:
             logging.error(e)
             raise CustomException(e, sys) from e
 
+    def start_size_check(self,data_injection_artifacts:DataInjectionArtifacts):
+        try:
+            check_size=CheckDataSize(data_injection_artifacts=data_injection_artifacts)
+            check_size.initiate_size_check()
+        except Exception as e:
+            raise CustomException(error_msg=e, error_details=sys)
     def start_data_transformations(
         self,
         data_injection_artifacts: DataInjectionArtifacts,
@@ -150,7 +186,20 @@ class Pipeline:
             raise CustomException(error_msg=e, error_details=sys) from  e
 
 
-    def run_pipeline(self):
+    def run_pipeline(self,prediction_data:pd.DataFrame=None)->pd.DataFrame:
+        """
+        this function to help to start a training pipe line 
+
+        Args:
+            prediction_data (DataFrame, optional): whether you are predict we can provoide data . Defaults to None.
+
+        Raises:
+            Exception: 
+            CustomException: 
+
+        Returns:
+            DataFrame: to return predicted DataFrame
+        """
         try:
 
             if not self.is_predicton:
@@ -172,6 +221,9 @@ class Pipeline:
                         f"data set not match to data schema please check data set format"
                     )
                 print(f"{'='*10}    finish data validaton       {'='*10}")
+
+                self.start_size_check(data_injection_artifacts=data_injection_artifacts)
+                print(f"{'='*10}    finish size check       {'='*10}")
 
                 feature_engineering_artifacts = self.start_data_transformations(
                     data_injection_artifacts=data_injection_artifacts,
@@ -203,18 +255,18 @@ class Pipeline:
 
                 print(f"{'='*10}    finish model pushing       {'='*10}")
             else:
-                df=pd.read_csv('/config/workspace/predict.csv',nrows=1000)
+                
                 feature_engineering_artifacts_list=self.to_read_json(PREDICTION_HELPER_JSON_FILE_NAME).get('feature_engineering_artifacts')
                 model_dir,trained_model_info_json_path=feature_engineering_artifacts_list[2],feature_engineering_artifacts_list[-1]
                 print(f'model_dir    {model_dir}  trained_model_info_json_path    {trained_model_info_json_path}')
                 prediction_data_list=self.start_data_transformations(data_injection_artifacts=None, saved_model_dir=model_dir,
-                data_validation_artifacts=None,predicted_data=df,is_prediction_data=self.is_predicton,
+                data_validation_artifacts=None,predicted_data=prediction_data,is_prediction_data=self.is_predicton,
                 latest_training_data_transformation_info_json_path=trained_model_info_json_path)
                 model_pushing_artifacts_list=self.to_read_json(PREDICTION_HELPER_JSON_FILE_NAME).get('model_pushing_artifacts')
                 
                 model_prediction=ModelPrediction(model_pushing_artifacts_list=model_pushing_artifacts_list)
-                df=model_prediction.initiate_data_prediction(predicted_data=pd.read_csv(prediction_data_list[0]))
-                print(df)
+                df=model_prediction.initiate_data_prediction(predicted_data=pd.read_parquet(prediction_data_list[0]))
+                return df
         except Exception as e:
             logging.error(e)
             raise CustomException(e, sys) from e

@@ -9,4 +9,5 @@ matplotlib
 seaborn
 lightgbm
 xgboost
+pyarrow
 -e .

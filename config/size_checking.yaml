@@ -1,0 +1,5 @@
+category_thersold: 15
+float16_max: 65500.0
+float16_min: 6.1e-05
+float32_max: 3.4028237e+38
+float32_min: 1.175494e-38

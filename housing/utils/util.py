@@ -1,6 +1,9 @@
-from housing.exception import CustomException
+import os
+import sys
+
 import yaml
-import os, sys
+
+from housing.exception import CustomException
 from housing.logger import logging
 
 

@@ -1,5 +1,9 @@
-from collections import namedtuple
 
+"""
+this file contan all component config details
+"""
+
+from collections import namedtuple
 
 DataIngestionConfig = namedtuple(
     "DataIngestionConfig",

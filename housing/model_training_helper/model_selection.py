@@ -1,28 +1,54 @@
-from typing import List
-import pickle
-from housing.constant import *
-from housing.constant.experiment_models  import all_models_dict
-from housing.constant.hyper_parameters import all_params_dict
-from housing.logger import logging
-from sklearn.cluster import KMeans
-from housing.exception import CustomException
-from sklearn.model_selection import RandomizedSearchCV
-from housing.entity.artifacts_entity import ModelTrainingArtifacts
-import pandas as pd
-import numpy as np
-import os,sys
 import json
+import os
+import pickle
+import sys
+from typing import List
 
+import numpy as np
+import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.model_selection import RandomizedSearchCV
 
+from housing.constant import *
+from housing.constant.experiment_models import all_models_dict
+from housing.constant.hyper_parameters import all_params_dict
+from housing.entity.artifacts_entity import ModelTrainingArtifacts
+from housing.exception import CustomException
+from housing.logger import logging
 
 
 class ReturnParams:
 
     def __init__(self,all_params_dict:dict=all_params_dict,
                 all_models_dict:dict=all_models_dict)->None:
-        self.all_params_dict=all_params_dict
-        self.all_models_dict=all_models_dict
+        """
+        ReturnParams to return best possible parameter based on the model performance by using RandomSearchCV
+
+        Args:
+            all_params_dict (dict, optional): all hyper parameter dict. Defaults to all_params_dict.
+            all_models_dict (dict, optional): all models dict. Defaults to all_models_dict.
+
+        Raises:
+            CustomException: 
+        """
+        try:
+            self.all_params_dict=all_params_dict
+            self.all_models_dict=all_models_dict
+        except Exception as e:
+            raise CustomException(error_msg=e, error_details=sys)
     def read_json(self,json_file_path:str)->dict:
+        """
+        read_json to read a json file
+
+        Args:
+            json_file_path (str): path of the json file
+
+        Raises:
+            CustomException: 
+
+        Returns:
+            dict: to return json content
+        """
         try:
             with open(json_file_path,'r') as json_file:
                 json_content=json.load(json_file)
@@ -30,20 +56,53 @@ class ReturnParams:
         except Exception as e:
             raise CustomException(error_msg=e, error_details=sys)
     def _return_params(self,model_name:str,json_file_path:str=None)->dict:
-        try:
-            
+        """
+        _return_params to return all params 
+
+        Args:
+            model_name (str): model name 
+            json_file_path (str, optional): . Defaults to None.
+
+        Raises:
+            CustomException: 
+
+        Returns:
+            dict: model hyper paramerter dict 
+        """
+        try:           
             return self.all_params_dict.get(model_name)
         except Exception as e:
             raise CustomException(error_msg=e, error_details=sys)
 
     def _return_model(self,model_name:str):
+        """
+        _return_model to return the non trained model based on model name
 
+        Args:
+            model_name (str): model name 
+
+        Raises:
+            CustomException: _description_
+        """
         try:
             return self.all_models_dict.get(model_name)
         except Exception as e:
             raise CustomException(error_msg=e, error_details=sys)
 
     def to_return_hyper_parameter_trained_model(self,model_name:str,x:pd.DataFrame,y:pd.DataFrame,base_accuracy=0.6):
+        """
+        to_return_hyper_parameter_trained_model to return best hyper parameter trained model 
+
+        Args:
+            model_name (str): trained model name
+            x (pd.DataFrame): x_train data
+            y (pd.DataFrame): y_train data
+            base_accuracy (float, optional): base accuracy for trained model score. Defaults to 0.6.
+
+        Raises:
+            CustomException: 
+
+        """
         try:
             model_params=self._return_params(model_name)
             model=self._return_model(model_name)
@@ -61,7 +120,24 @@ class ReturnParams:
 class ToClassifyDataUsingCluster:
   def __init__(self):
     pass
+    """
+      ToClassifyDataUsingCluster to cluster the data 
+    """
   def to_classify_data(self,df:pd.DataFrame,model_file_path:str,n_clusters=4)->pd.DataFrame:
+    """
+      to_classify_data to cluster tha data 
+
+      Args:
+          df (pd.DataFrame): data for cluster
+          model_file_path (str): file path for cluster model save
+          n_clusters (int, optional): no of groups to classify data . Defaults to 4.
+
+      Raises:
+          CustomException: 
+
+      Returns:
+          pd.DataFrame: to cliassified data 
+    """
     try:
         new_df=df.copy()
         if OUT_COME_COLUMN_NAME in list(new_df.columns):
@@ -75,6 +151,19 @@ class ToClassifyDataUsingCluster:
       raise CustomException(error_msg=e, error_details=sys)
 
   def predict_data(self,predicted_data:pd.DataFrame,model_path:str)->pd.DataFrame:
+    """
+      predict_data to predict data on which cluster 
+
+      Args:
+          predicted_data (pd.DataFrame): predicted data 
+          model_path (str): trained cluster model path
+
+      Raises:
+          CustomException: 
+
+      Returns:
+          pd.DataFrame: predicted data with cluster number
+    """
     try:
         predicted_data_copy=predicted_data.copy()
         if OUT_COME_COLUMN_NAME in list(predicted_data_copy.columns):
@@ -92,22 +181,40 @@ class ToClassifyDataUsingCluster:
 class CombineAll(ToClassifyDataUsingCluster,ReturnParams):
 
     def __init__(self,all_model_names_list:List[str]):
+        """
+        CombineAll to combine all classes
+
+        Args:
+            all_model_names_list (List[str]): all model name list
+        """
         self.all_model_names=all_model_names_list
         self.all_params_dict=all_params_dict
         self.all_models_dict=all_models_dict
 
     def write_json(self,json_training_info_file_path:str,
-                    content_key:str,content_value:str,file_present_or_not=True):
-        already_exist_content_dic=dict()
-        if file_present_or_not and os.path.exists(json_training_info_file_path):
-            
-            with open(json_training_info_file_path) as json_file:
-                already_exist_content_dic=json.load(json_file)
-        with open(json_training_info_file_path,'w') as json_file:
-            already_exist_content_dic.update({content_key:content_value})
-            json.dump(already_exist_content_dic,json_file)
+                    content_key:str,content_value:str):
+        """
+        write_json to write a content into json file
+
+        Args:
+            json_training_info_file_path (str): json file path 
+            content_key (str): content of key
+            content_value (str): value of content
+        """
+        try:
+            already_exist_content_dic=dict()
+            if  os.path.exists(json_training_info_file_path):
+                
+                with open(json_training_info_file_path) as json_file:
+                    already_exist_content_dic=json.load(json_file)
+            with open(json_training_info_file_path,'w') as json_file:
+                already_exist_content_dic.update({content_key:content_value})
+                json.dump(already_exist_content_dic,json_file)
+        except Exception as e:
+            raise CustomException(error_msg=e, error_details=sys)
     
     def save_best_model(self,model,model_path:str):
+        # try:
         with open(model_path,'wb') as pickle_file:
             pickle.dump(model,pickle_file)
 

@@ -1,20 +1,32 @@
-from housing.config.configuration import HousingConfig
-from housing.logger import logging
-from housing.exception import CustomException
-from housing.utils.util import read_yaml
-from housing.entity.artifacts_entity import (
-    DataInjectionArtifacts,
-    DataValidationArtifacts,
-)
-from housing.constant import *
-import os, sys
+import os
+import sys
+
 import pandas as pd
+
+from housing.config.configuration import HousingConfig
+from housing.constant import *
+from housing.entity.artifacts_entity import (DataInjectionArtifacts,
+                                             DataValidationArtifacts)
+from housing.exception import CustomException
+from housing.logger import logging
+from housing.utils.util import read_yaml
 
 
 class DataValidation:
+
     def __init__(
         self, config: HousingConfig, data_injection_artifacts: DataInjectionArtifacts
     ):
+        """
+        DataValidation help us to validate data using schema config
+
+        Args:
+            config (HousingConfig): config class 
+            data_injection_artifacts (DataInjectionArtifacts): data injection artifacts(data injection all file path)
+
+        Raises:
+            CustomException: 
+        """
         try:
             self.config = config
             self.data_injection_artifacts = data_injection_artifacts
@@ -23,6 +35,17 @@ class DataValidation:
             raise CustomException(e, sys) from e
 
     def read_yaml_and_return_content(self, key: str) -> dict.values:
+        """
+        read_yaml_and_return_content to read a yaml file and return  content
+        Args:
+            key (str): key for yaml content
+
+        Raises:
+            CustomException: 
+
+        Returns:
+            dict.values: to return dict value by given key
+        """
         try:
             data_validation_schema_file_path = self.config.schema_file_path
             if os.path.exists(data_validation_schema_file_path):
@@ -34,6 +57,15 @@ class DataValidation:
             raise CustomException(e, sys) from e
 
     def validate_data_columns_and_dtypes(self) -> bool:
+        """
+        validate_data_columns_and_dtypes to validate a data columns and dtypes by using schema config
+        Raises:
+            CustomException: 
+
+        Returns:
+            bool: if all are match (downloaded data and schema config) then return True 
+            else to return false
+        """
         try:
             is_statified = False
             train_file_path = self.data_injection_artifacts.train_file_path
@@ -41,8 +73,8 @@ class DataValidation:
             if all([os.path.join(train_file_path), os.path.join(test_file_path)]):
                 all_columns_dtypes = self.read_yaml_and_return_content(key=COLUMNS_KEY)
                 all_columns = list(all_columns_dtypes.keys())
-                train_df = pd.read_csv(train_file_path, usecols=all_columns)
-                test_df = pd.read_csv(test_file_path, usecols=all_columns)
+                train_df = pd.read_parquet(train_file_path)
+                test_df = pd.read_parquet(test_file_path)
                 if len(all_columns) == train_df.shape[1] == test_df.shape[1]:
                     check_len = []
                     for col in train_df.columns:
@@ -64,12 +96,22 @@ class DataValidation:
             raise CustomException(e, sys) from e
 
     def validate_uniques_of_columns(self) -> bool:
+        """
+        validate_uniques_of_columns to validate unique vlaues of the categorical columns 
+
+        Raises:
+            CustomException: 
+
+        Returns:
+            bool: if all uniques match to schema config then to return True
+            else return False
+        """
         try:
             train_file_path = self.data_injection_artifacts.train_file_path
             test_file_path = self.data_injection_artifacts.test_file_path
             if all([os.path.exists(train_file_path), os.path.exists(test_file_path)]):
-                train_df = pd.read_csv(train_file_path)
-                test_df = pd.read_csv(test_file_path)
+                train_df = pd.read_parquet(train_file_path)
+                test_df = pd.read_parquet(test_file_path)
 
                 uniques = self.read_yaml_and_return_content(DOMAIN_VALUE_KEY).get(
                     INSIDE_DOMAIN_VALUE_KEY
@@ -87,6 +129,15 @@ class DataValidation:
             raise CustomException(e, sys) from e
 
     def initiate_data_validation(self) -> DataValidationArtifacts:
+        """
+        initiate_data_validation to combine all functions  
+
+        Raises:
+            CustomException: 
+
+        Returns
+            DataValidationArtifacts: to return all DataValidationArtifacts
+        """
         try:
             json_report_file_path = self.config.report_file_path
             data_validation_artifacts = DataValidationArtifacts(

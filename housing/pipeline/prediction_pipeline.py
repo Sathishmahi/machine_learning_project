@@ -1,11 +1,14 @@
+import os
+import pickle
+import sys
+from typing import List
+
+import numpy as np
+import pandas as pd
+
+from housing.entity.artifacts_entity import ModelPushinArtifacts
 from housing.exception import CustomException
 from housing.logger import logging
-from housing.entity.artifacts_entity import ModelPushinArtifacts
-import os,sys
-import pandas as pd
-import numpy as np
-from typing import List
-import pickle
 
 
 class ModelPrediction:

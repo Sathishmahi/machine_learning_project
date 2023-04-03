@@ -3,6 +3,7 @@ import sys
 
 
 class CustomException(Exception):
+    
     def __init__(self, error_msg: Exception, error_details: sys) -> None:
         # super().__init__(error_msg)
         self.error = CustomException.get_detailed_error_msg(

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Learning</title>
+</head>
+<body>
+    
+    <h1>Median House Value Prediction</h1>
+    <form action=" {{url_for('predict_')}} " method="post">
+        <input type="text" placeholder="longitude" name="1">
+        <input type="text" placeholder="latitude" name="2">
+        <input type="text" placeholder="housing_median_age" name="3">
+        <input type="text" placeholder="total_rooms" name="4">
+        <input type="text" placeholder="total_bedrooms" name="5">
+        <input type="text" placeholder="population" name="6">
+        <input type="text" placeholder="households" name="7">
+        <input type="text" placeholder="median_income" name="8">
+        <input type="text" placeholder="ocean_proximity" name="9">
+
+        <button type="submit">submit</button>
+
+    </form>
+<h1> {{prediction_text}}</h1>
+
+</body>
+</html>

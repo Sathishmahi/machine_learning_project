@@ -1,3 +1,8 @@
+"""
+    this file contain all component artifacts details 
+    
+"""
+
 from collections import namedtuple
 
 DataInjectionArtifacts = namedtuple(
