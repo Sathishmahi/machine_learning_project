@@ -130,8 +130,7 @@ PREDICTION_HELPER_JSON_FILE_NAME='prediction_helper_json.json'
 
 
 ### size checking related var
-
-SIZE_CHECKING_YAML_FILE_PATH='/config/size_checking.yaml'
+SIZE_CHECKING_YAML_FILE_PATH=os.path.join(ROOT_DIR,CONFIG_DIR,'size_checking.yaml')
 FLOAT16_MIN_KEY="float16_min"
 FLOAT16_MAX_KEY="float16_max"
 FLOAT32_MIN_KEY="float32_min"

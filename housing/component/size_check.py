@@ -58,7 +58,7 @@ class CheckDataSize:
             dict: to return file content
         """
         try:
-            if os.path.exists(yaml_file_path):
+            if not os.path.exists(yaml_file_path):
                 raise FileNotFoundError(f'yaml file not fount {yaml_file_path} ')
             with open(yaml_file_path,'r') as yaml_file:
                 yaml_content=yaml.safe_load(yaml_file)

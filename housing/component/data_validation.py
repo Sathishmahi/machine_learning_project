@@ -48,6 +48,7 @@ class DataValidation:
         """
         try:
             data_validation_schema_file_path = self.config.schema_file_path
+            print('data_validation_schema_file_path   ',data_validation_schema_file_path)
             if os.path.exists(data_validation_schema_file_path):
                 file_content = read_yaml(file_path=data_validation_schema_file_path)
                 return file_content.get(key)
