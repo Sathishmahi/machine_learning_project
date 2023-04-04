@@ -1,11 +1,10 @@
-<<<<<<< HEAD
+
 # end to end machine_learning_project
 
 =======
 # End to End ML project
 
 ## Problem Statement 
->>>>>>> baf7f7d72371feb19b52d203256ea70ce90b84c5
 
 To predict the median house value of California State(U.S)
 
@@ -81,7 +80,7 @@ Clone the project
 ```bash
 git clone https://github.com/Sathishmahi/machine_learning_project.git
 ```
-<<<<<<< HEAD
+
 Problem Statement
 =======
 
@@ -107,7 +106,6 @@ run test.py to train models
 
 ```bash
 python test.py
->>>>>>> baf7f7d72371feb19b52d203256ea70ce90b84c5
 ```
 
 run server
