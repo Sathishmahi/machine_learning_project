@@ -168,6 +168,7 @@ class Pipeline:
             logging.info(f'start model_evaluation')
             evaluation=ModelEvaluation(model_training_artifacts)
             model_dir=model_training_artifacts.saved_model_dir_path
+            print(f'saved model dir path ======  {model_dir}')
             json_info_file_path=model_training_artifacts.ovel_all_model_training_json_file_path
             model_evalation_artifacts=evaluation.initiate_model_evaluation(model_dir, json_info_file_path)
             logging.info(f'finish model evalation and model training output is [{model_evalation_artifacts}]')
@@ -241,8 +242,7 @@ class Pipeline:
                 self.to_write_json(json_file_path=PREDICTION_HELPER_JSON_FILE_NAME, content={'model_evalation_artifacts':list(model_evalation_artifacts)})
 
                 model_dir=model_training_artifacts.saved_model_dir_path
-                base_model_dir_list=model_dir.split('/')[:-2]
-                base_model_dir='/'.join(base_model_dir_list)
+                base_model_dir=os.path.split(os.path.split(model_dir)[0])[0]
                 model_dir_items=[item for item in os.listdir(base_model_dir) if '.' not in item]
                 len_of_model_training_dir,cluster_file_path=len(model_dir_items),self.config.model_training_config.cluster_model_file_path
 

@@ -62,7 +62,6 @@ class ModelPushing:
             shutil.copyfile(src_copy, dst_copy)
 
             if len_of_model_training_dir==1:
-                print(f'inside the len = 1 ')
                 keys,alternative_keys=[],[]
                 for model_name in os.listdir(train_models_path):
                     src_path=os.path.join(train_models_path,model_name)
@@ -76,7 +75,6 @@ class ModelPushing:
                 with open(current_model_report_json_path,'r') as json_file:
                     dic=json.load(json_file)
                 with open(current_model_report_json_path,'w') as json_file:
-                    print(f'new evaluation dic {alternative_keys}     {dic.values()}')
                     new_dic=dict(zip(alternative_keys,dic.values()))
                     json.dump(new_dic,json_file)
                 return model_pushing_artifacts
@@ -89,8 +87,6 @@ class ModelPushing:
                     json_content=json.load(json_file)
                 keys,alternative_keys,score_get_key=[],[],[]
                 for old_file,new_file in zip(self.models_tuple[0],self.models_tuple[1]):
-                    print(f'old file path ===== {old_file}')
-                    print(f'new file path ===== {new_file}')
                     new_file_name=os.path.basename(new_file)
                     old_file_name=os.path.basename(old_file)
                     

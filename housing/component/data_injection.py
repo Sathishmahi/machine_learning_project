@@ -60,7 +60,6 @@ class DataInjection:
             logging.info(
                 f"downloading file from download url [{downloaded_url}] file path is  [{tgz_file_path}]"
             )
-            print(f"tar file path {downloaded_url}")
             urllib.request.urlretrieve(downloaded_url, tgz_file_path)
             logging.info(f"downloading file complete file path is  [{tgz_file_path}]")
             return tgz_file_path

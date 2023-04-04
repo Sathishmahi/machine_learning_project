@@ -142,7 +142,7 @@ class ToClassifyDataUsingCluster:
         new_df=df.copy()
         if OUT_COME_COLUMN_NAME in list(new_df.columns):
             new_df_1=new_df.drop(columns=OUT_COME_COLUMN_NAME)
-        kmeans=KMeans(n_clusters=n_clusters)
+        kmeans=KMeans(n_clusters=n_clusters,n_init=1)
         new_df['cluster_no']=kmeans.fit_predict(new_df_1)
         with open(model_file_path,'wb') as pickle_file:
             pickle.dump(  kmeans,pickle_file )
@@ -168,7 +168,6 @@ class ToClassifyDataUsingCluster:
         predicted_data_copy=predicted_data.copy()
         if OUT_COME_COLUMN_NAME in list(predicted_data_copy.columns):
             predicted_data_copy_1=predicted_data.drop(columns=OUT_COME_COLUMN_NAME)
-        print(f'columns === {predicted_data_copy.columns}')
         with open(model_path,'rb') as picle_file:
             model=pickle.load(picle_file)
         predicted_data_copy['cluster_no']=model.predict(predicted_data_copy_1)

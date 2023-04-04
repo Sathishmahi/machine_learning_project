@@ -48,7 +48,6 @@ class DataValidation:
         """
         try:
             data_validation_schema_file_path = self.config.schema_file_path
-            print('data_validation_schema_file_path   ',data_validation_schema_file_path)
             if os.path.exists(data_validation_schema_file_path):
                 file_content = read_yaml(file_path=data_validation_schema_file_path)
                 return file_content.get(key)
@@ -76,10 +75,12 @@ class DataValidation:
                 all_columns = list(all_columns_dtypes.keys())
                 train_df = pd.read_parquet(train_file_path)
                 test_df = pd.read_parquet(test_file_path)
+
                 if len(all_columns) == train_df.shape[1] == test_df.shape[1]:
                     check_len = []
                     for col in train_df.columns:
                         schema_dtype = all_columns_dtypes.get(col)
+
                         df_dtype = train_df[col].dtypes
                         if (col in all_columns) and (
                             (schema_dtype == "O" and df_dtype == "category")
@@ -90,7 +91,11 @@ class DataValidation:
                     if len(check_len) == train_df.shape[1]:
                         is_statified = True
                 return is_statified
-            return False
+            # return False
+            else:
+                logging.error(msg=f'train or test file not found please check')
+                raise FileNotFoundError('train or test file not found')
+            
 
         except Exception as e:
             logging.error(e)
@@ -110,26 +115,37 @@ class DataValidation:
         try:
             train_file_path = self.data_injection_artifacts.train_file_path
             test_file_path = self.data_injection_artifacts.test_file_path
+
             if all([os.path.exists(train_file_path), os.path.exists(test_file_path)]):
                 train_df = pd.read_parquet(train_file_path)
                 test_df = pd.read_parquet(test_file_path)
-
-                uniques = self.read_yaml_and_return_content(DOMAIN_VALUE_KEY).get(
-                    INSIDE_DOMAIN_VALUE_KEY
-                )
-                data_uniques = train_df[INSIDE_DOMAIN_VALUE_KEY].unique()
-                is_statified = False
-                if len(data_uniques) == len(uniques) and len(
-                    [True for uni in data_uniques if uni in uniques]
-                ) == len(uniques):
-                    is_statified = True
-                return is_statified
-            return False
+                all_statisfied=[]
+                uniques = [uni.strip() for uni in self.read_yaml_and_return_content(DOMAIN_VALUE_KEY).get(
+                        INSIDE_DOMAIN_VALUE_KEY
+                )]
+                for train_df in [train_df,test_df]:
+                    
+                    data_uniques = train_df[INSIDE_DOMAIN_VALUE_KEY].unique()
+                    is_statified = False
+                    # if len(data_uniques) == len(uniques) and len(
+                    #     [True for uni in data_uniques if uni in uniques]
+                    # ) == len(uniques):
+                    #     is_statified = True
+                    for unique in data_uniques:
+                        if unique not in uniques:
+                            return is_statified
+                        is_statified=True
+                    all_statisfied.append(is_statified)
+                return all(all_statisfied)
+            # return False
+            else:
+                logging.error(msg=f'train or test file not found please check')
+                raise FileNotFoundError('train or test file not found')
         except Exception as e:
             logging.error(e)
             raise CustomException(e, sys) from e
 
-    def initiate_data_validation(self) -> DataValidationArtifacts:
+    def initiate_data_validation(self,strict=True) -> DataValidationArtifacts:
         """
         initiate_data_validation to combine all functions  
 
