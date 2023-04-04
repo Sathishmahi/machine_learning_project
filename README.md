@@ -1,7 +1,4 @@
 
-# end to end machine_learning_project
-
-=======
 # End to End ML project
 
 ## Problem Statement 
@@ -80,9 +77,6 @@ Clone the project
 ```bash
 git clone https://github.com/Sathishmahi/machine_learning_project.git
 ```
-
-Problem Statement
-=======
 
 create conda env
 
