@@ -45,7 +45,16 @@ median_house_value
 median_house_value 
 
 
-![Prediction Pipe Line](https://user-images.githubusercontent.com/88724458/229688620-5f8a700a-d653-4de3-af70-787292962ae4.png)
+## Training Pipe Line
+
+![training_pipeline](https://user-images.githubusercontent.com/88724458/229689630-995e6372-245e-442a-a616-ca2d42f29d76.png)
+
+
+## Prediction Pipe Line
+
+![prediction_pipeline](https://user-images.githubusercontent.com/88724458/229689695-ffa9dd02-56fd-4153-85f8-472dfa54cbaa.png)
+
+
 
 ## Tech Stack
 
