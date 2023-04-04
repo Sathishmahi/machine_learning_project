@@ -256,8 +256,6 @@ class DataTransformation:
                     all_na_val_df[na_column].isna() == False
                 ].index
                 trainded_model_path = os.listdir(model_save_dir)[0]
-                print(f'trainded_model_path   {trainded_model_path}   model_save_dir    {model_save_dir} ')
-                print('file path    ',os.path.join(model_save_dir, trainded_model_path))
                 with open(
                     os.path.join(model_save_dir, trainded_model_path), "rb"
                 ) as pickle_file:
@@ -621,7 +619,6 @@ class DataTransformation:
                     json_info_file_path,
                     is_train_data=is_train_data,
                 )
-                print(f"finish multi colinerity")
                 handle_negative_corr_path = self.to_handle_negative_correlation(
                     pd.read_parquet(multi_file_path),
                     saved_model_dir,
@@ -630,7 +627,6 @@ class DataTransformation:
                     json_info_file_path,
                     is_train_data=is_train_data,
                 )
-                print(f"finish to handle negative correlation")
                 handle_cat_columns_path = self.to_handle_cat_features(
                     pd.read_parquet(handle_negative_corr_path),
                     train_data_dir,
@@ -638,10 +634,8 @@ class DataTransformation:
                     json_info_file_path,
                     is_train_data=is_train_data,
                 )
-                print(f"finish handle cat features")
                 handle_na_values_path=handle_cat_columns_path
                 df=pd.read_parquet(handle_cat_columns_path)
-                print(df.isna().sum())
                 if not is_prediction_data:
                     handle_na_values_path = self.to_handle_na_values(
                         df,
@@ -650,7 +644,6 @@ class DataTransformation:
                         test_data_dir,
                         is_train_data=is_train_data,
                     )
-                    print("finish handle na values")
                 after_handle_non_normal_dist_data_path = (
                     self.to_handle_non_normal_distribution(
                         pd.read_parquet(handle_na_values_path),
@@ -662,7 +655,6 @@ class DataTransformation:
                     )
                 )
 
-                print(f"finish to handle non normal dist")
                 final_data_path = self.to_remove_unwnated_columns(
                     df=pd.read_parquet(after_handle_non_normal_dist_data_path),
                     train_data_dir=train_data_dir,
@@ -671,7 +663,6 @@ class DataTransformation:
                     is_train_data=is_train_data,
                     is_predicted_data=is_prediction_data
                 )
-                print("finish data transformation")
                 after_transformed_data_path_list.append(final_data_path)
             if not is_prediction_data:
                 after_transformed_train_data_path, after_transformed_test_data_path = (
@@ -691,7 +682,6 @@ class DataTransformation:
 
                 return feature_engineering_artifacts
             else:
-                print(after_transformed_data_path_list)
                 return after_transformed_data_path_list
             #     train_data_dir = None
             #     test_data_dir = save_prediction_data_dir

@@ -1,11 +1,6 @@
-<<<<<<< HEAD
-# end to end machine_learning_project
-
-=======
 # End to End ML project
 
 ## Problem Statement 
->>>>>>> baf7f7d72371feb19b52d203256ea70ce90b84c5
 
 To predict the median house value of California State(U.S)
 
@@ -49,25 +44,13 @@ median_house_value
 
 median_house_value 
 
-
-## Training Pipe Line
-
-![training_pipeline](https://user-images.githubusercontent.com/88724458/229689630-995e6372-245e-442a-a616-ca2d42f29d76.png)
-
-
-## Prediction Pipe Line
-
-![prediction_pipeline](https://user-images.githubusercontent.com/88724458/229689695-ffa9dd02-56fd-4153-85f8-472dfa54cbaa.png)
-
-
-
 ## Tech Stack
 
 **Language:** Python
 
 **Web Framework:** Python Flask
 
-**ML Libraries to Used:** Pandas , Numpy , Scikit-learn
+**ML Libraries to Used:** Pandas , Numpy , Sckit-learn
 
 **ML Alogorithms to Used:** 
 LightGBM , XGBoost , ADABoost , Ridge , Lasso ,  Elasticnet , DecisionTree , RandomForest , GradientBoost , KMeans(cluster) , KNN(to handle the outlier)
@@ -75,15 +58,11 @@ LightGBM , XGBoost , ADABoost , Ridge , Lasso ,  Elasticnet , DecisionTree , Ran
 
 ## Run Locally
 
-
 Clone the project
 
 ```bash
 git clone https://github.com/Sathishmahi/machine_learning_project.git
 ```
-<<<<<<< HEAD
-Problem Statement
-=======
 
 create conda env
 
@@ -97,21 +76,12 @@ activate conda env
 conda activate venv/
 ```
 
-install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
 run test.py to train models
 
 ```bash
 python test.py
->>>>>>> baf7f7d72371feb19b52d203256ea70ce90b84c5
 ```
-
 run server
-
 ```bash
 python app.py
 ```
