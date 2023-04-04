@@ -1,10 +1,8 @@
-# machine_learning_project
-machine_learning_project
+# end to end machine_learning_project
 
->NOTE: Flask app
 
 ```
-app.run
+Problem Statement
 ```
 
 
