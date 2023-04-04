@@ -8,6 +8,7 @@ To predict the median house value of California State(U.S)
 ## about data
 in this data collected information on the variables using all the block groups in California from the 1990 Cens us.
 
+
 ## Total no of Rows
 20640 
 
@@ -55,7 +56,9 @@ median_house_value
 
 ![prediction_pipeline](https://user-images.githubusercontent.com/88724458/229689695-ffa9dd02-56fd-4153-85f8-472dfa54cbaa.png)
 
+## Output Basic UI Look Like
 
+![output](https://user-images.githubusercontent.com/88724458/229751405-ee44f212-f834-4666-b768-0495f729f7fb.png)
 
 ## Tech Stack
 
