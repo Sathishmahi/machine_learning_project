@@ -62,7 +62,7 @@ median_house_value
 
 **Web Framework:** Python Flask
 
-**ML Libraries to Used:** Pandas , Numpy , Sckit-learn
+**ML Libraries to Used:** Pandas , Numpy , Scikit-learn
 
 **ML Alogorithms to Used:** 
 LightGBM , XGBoost , ADABoost , Ridge , Lasso ,  Elasticnet , DecisionTree , RandomForest , GradientBoost , KMeans(cluster) , KNN(to handle the outlier)
@@ -89,12 +89,20 @@ activate conda env
 conda activate venv/
 ```
 
+install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
 run test.py to train models
 
 ```bash
 python test.py
 ```
+
 run server
+
 ```bash
 python app.py
 ```
